@@ -22,14 +22,16 @@
             'Yes, I see a trend.',
             'No, I don\'t see a trend.',
             'I can\'t tell if there\'s a trend.',
+            'The larger data set made my trend harder to see.',
           ]"
           :feedbacks="[
-            'Isn\'t it interesting how adding more data can make a trend more clear?',
+            'Cool, right? When there is a lot of random variation in properties being measured (like galaxy sizes) and you have a small sample, whether you saw a trend or not depends on the galaxies you happened to pick. You need a large enough sample to have confidence in the overall trend.',
             'Try talking to a neighbor or your instructor. Even with a noisy dataset, you should be able to make out some sort of trend',
             'Try talking to a neighbor or your instructor. Even with a noisy dataset, you should be able to make out some sort of trend',
+            'This can happen when there is a lot of random variation in properties being measured (like galaxy sizes). With a small sample, whether you saw a strong trend or not depends on the galaxies you happened to pick. You need a large enough sample to have confidence in the overall trend.',
           ]"
           :correct-answers="[]"
-          :neutral-answers='[0,1,2]'
+          :neutral-answers='[0,1,2,3]'
           :score-tag="state_view.score_tag"
           @mc-emit="mc_callback($event)"
           :initialization="state_view.mc_score"

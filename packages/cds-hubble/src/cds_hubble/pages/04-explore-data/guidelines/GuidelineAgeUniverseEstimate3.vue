@@ -123,7 +123,7 @@
       dense
       color="info darken-1"
     >
-      Not quite. Make sure you are entering the values for the "Best Fit Galaxy" (in the bottom row of your table), with distance in the top box and velocity in the bottom box.
+      Not quite. Make sure you are entering the values for the "Best Fit Galaxy" (from the table at the top of this guideline), with distance in the top box and velocity in the bottom box.
     </v-alert>
   </scaffold-alert> 
 </template>

@@ -54,6 +54,25 @@ def this_or_default(arr, default, index):
         return default
     return arr[index]
 
+def set_viewer_x_range(viewer: HubbleDotPlotViewer, x_min: float, x_max: float):
+    """
+    Set the x range of the viewer
+    """
+
+    order = [('x_min', x_min), ('x_max', x_max)]
+    max_first = (
+        viewer.state.x_max is not None 
+        and x_min is not None
+        and viewer.state.x_max <= x_min
+        )
+    if max_first: order.reverse()
+    for name, value in order:
+        if value is not None:
+            setattr(viewer.state, name, value)
+    
+    
+
+    
 
 _original_update_data = DotplotScatterLayerArtist._update_data
 
@@ -176,8 +195,7 @@ def DotplotViewer(
 
             dotplot_view.state.hist_n_bin = nbin
             if is_valid_range(x_bounds.value):
-                dotplot_view.state.x_min = x_bounds.value[0]
-                dotplot_view.state.x_max = x_bounds.value[1]
+                set_viewer_x_range(dotplot_view, x_bounds.value[0], x_bounds.value[1])
             
             if nbin_func is not None:
                 dotplot_view.state.hist_n_bin = nbin_func(dotplot_view.state.x_min, dotplot_view.state.x_max)   
@@ -326,8 +344,7 @@ def DotplotViewer(
             def _on_reset_bounds(*args):
                 if None not in reset_bounds.value and len(reset_bounds.value) == 2:
                     new_range = reset_bounds.value
-                    dotplot_view.state.x_min = new_range[0]
-                    dotplot_view.state.x_max = new_range[1]
+                    set_viewer_x_range(dotplot_view, new_range[0], new_range[1])
                 else:
                     new_range = [dotplot_view.state.x_min, dotplot_view.state.x_max]
                 
@@ -376,18 +393,13 @@ def DotplotViewer(
             line_marker_at.subscribe(lambda new_val: _update_lines(value = new_val))
             vertical_line_visible.subscribe(lambda new_val: _update_lines())
             def reset_hist_n_bin(xmin = None, xmax = None):
-                if nbin_func is not None:
-                    if xmin is None:
-                        xmin = dotplot_view.state.x_min
-                    if xmax is None:
-                        xmax = dotplot_view.state.x_max
+                    set_viewer_x_range(dotplot_view, xmin, xmax)
                     if is_valid_range([xmin, xmax]):
                         dotplot_view.state.hist_n_bin = nbin_func(xmin, xmax)
             def update_x_bounds(new_val):
                 logger.info(f"{title}: Updating x_bounds")
                 if is_valid_range(new_val):
-                    dotplot_view.state.x_min = new_val[0]
-                    dotplot_view.state.x_max = new_val[1]
+                    set_viewer_x_range(dotplot_view, new_val[0], new_val[1])
                 reset_hist_n_bin(new_val[0], new_val[1])
                 reset_selection()
             x_bounds.subscribe(update_x_bounds)

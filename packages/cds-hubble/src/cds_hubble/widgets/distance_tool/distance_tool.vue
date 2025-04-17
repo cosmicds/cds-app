@@ -124,6 +124,8 @@
 
 <script>
 export default {
+  
+
     
   mounted() {
     this.setup();
@@ -132,25 +134,27 @@ export default {
     window.addEventListener('resize', this.handleResize);
     // We don't get a Window resize event when the canvas first appears
     // so we watch the canvas' dimensions instead
-    const resizeObserver = new ResizeObserver(_entries => {
+    this.resizeObserver = new ResizeObserver(_entries => {
       this.handleResize();
     });
 
     // The two canvases have the same dimensions
     // so we only need to observe one
-    resizeObserver.observe(this.canvas);
+    this.resizeObserver.observe(this.canvas);
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize);
-    resizeObserver.unobserve(this.canvas);
+    this.resizeObserver.disconnect();
   },
 
   methods: {
 
     setup: function() {
+      this.resizeObserver = null;
       this.setupMeasuringCanvas();
       this.setupFOVCanvas();
+      
     },
 
     // This stuff only needs to be done once

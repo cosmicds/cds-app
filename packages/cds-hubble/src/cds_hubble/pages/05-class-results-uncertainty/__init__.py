@@ -37,6 +37,7 @@ from ...viewer_marker_colors import (
     OTHER_STUDENTS_COLOR,
     GENERIC_COLOR
 )
+from ...demo_helpers import set_dummy_all_measurements
 
 from cds_core.logger import setup_logger
 
@@ -44,7 +45,6 @@ logger = setup_logger("STAGE 5")
 
 
 GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
-show_team_interface = GLOBAL_STATE.value.show_team_interface
 
 @solara.component
 def Page():
@@ -110,7 +110,7 @@ def Page():
                 viewer.state.hist_n_bin = int(xmax - xmin)
                 viewer.state.hist_x_min = xmin
                 viewer.state.hist_x_max = xmax
-
+    force_memo_update = solara.use_reactive(False)
     data_ready = solara.use_reactive(False)
     def glue_setup() -> Tuple[JupyterApplication, Dict[str, PlotlyBaseView]]:
         # NOTE: use_memo has to be part of the main page render. Including it
@@ -118,6 +118,10 @@ def Page():
         gjapp = JupyterApplication(
             GLOBAL_STATE.value.glue_data_collection, GLOBAL_STATE.value.glue_session
         )
+        
+        if len(LOCAL_STATE.value.measurements) == 0:
+            data_ready.set(False)
+            return gjapp, {}
 
         layer_viewer = gjapp.new_data_viewer(HubbleScatterView, show=False)
         student_slider_viewer = gjapp.new_data_viewer(HubbleScatterView, show=False)
@@ -147,6 +151,11 @@ def Page():
             LOCAL_API.get_measurements(GLOBAL_STATE, LOCAL_STATE)
 
         class_measurements = LOCAL_API.get_class_measurements(GLOBAL_STATE, LOCAL_STATE)
+        # if we are a teacher then our measurements were not loaded with class_measurements and only exist on the front end in LOCAL_STATE.value.measuements
+        #  make sure we add these to the class_measurements
+        if (not GLOBAL_STATE.value.update_db) and len(LOCAL_STATE.value.measurements)>0:
+            class_measurements.extend(m for m in LOCAL_STATE.value.measurements)
+
         measurements = Ref(LOCAL_STATE.fields.class_measurements)
         student_ids = Ref(LOCAL_STATE.fields.stage_5_class_data_students)
         if class_measurements and not student_ids.value:
@@ -178,6 +187,8 @@ def Page():
         student_data = GLOBAL_STATE.value.add_or_update_data(student_data)
 
         class_ids = LOCAL_STATE.value.stage_5_class_data_students
+        if (not GLOBAL_STATE.value.update_db) and len(LOCAL_STATE.value.measurements)>0:
+            class_ids.append([m.student_id for m in LOCAL_STATE.value.measurements][0])
         class_data_points = [m for m in LOCAL_STATE.value.class_measurements if m.student_id in class_ids]
         class_data = models_to_glue_data(class_data_points, label="Class Data")
         class_data = GLOBAL_STATE.value.add_or_update_data(class_data)
@@ -307,10 +318,10 @@ def Page():
                                             filter=lambda msg: msg.data.label in ("All Student Summaries", "All Class Summaries"))
 
         data_ready.set(True)
-
+        logger.info("Finished setting up glue viewers")
         return gjapp, viewers
 
-    gjapp, viewers = solara.use_memo(glue_setup, dependencies=[])
+    gjapp, viewers = solara.use_memo(glue_setup, dependencies=[force_memo_update.value])
 
     if not data_ready.value:
         rv.ProgressCircular(
@@ -319,6 +330,19 @@ def Page():
             indeterminate=True,
             size=100,
         )
+        
+        if GLOBAL_STATE.value.show_team_interface:
+
+            def fill_all_data():
+                set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+                Ref(LOCAL_STATE.fields.measurements_loaded).set(True)
+                force_memo_update.set(not force_memo_update.value)
+            solara.Button(
+                label="Fill in Sample Data",
+                on_click=fill_all_data,
+                classes=["demo-button"],
+            )
+            fill_all_data()
         return
 
     _update_bins((viewers["all_student_hist"], viewers["class_hist"]))
@@ -354,9 +378,6 @@ def Page():
             show_class_data(marker)
             show_student_data(marker)
 
-    current_step = Ref(COMPONENT_STATE.fields.current_step)
-    
-    current_step.subscribe(update_layer_viewer_visibilities)
     update_layer_viewer_visibilities(COMPONENT_STATE.value.current_step)
 
     class_best_fit_clicked = Ref(COMPONENT_STATE.fields.class_best_fit_clicked)
@@ -381,7 +402,14 @@ def Page():
         if marker <= Marker.sho_mya1 or marker >= Marker.con_int2:
             show_class_hide_my_age_subset(True)
 
-    Ref(COMPONENT_STATE.fields.current_step).subscribe(_on_marker_updated)
+    def _state_callback_setup():
+        current_step = Ref(COMPONENT_STATE.fields.current_step)
+        current_step.subscribe(update_layer_viewer_visibilities)
+        current_step.subscribe(_on_marker_updated)
+        
+    solara.use_memo(_state_callback_setup, dependencies=[])
+
+    
 
     line_fit_tool = viewers["layer"].toolbar.tools['hubble:linefit']
     add_callback(line_fit_tool, 'active',  _on_best_fit_line_shown)
@@ -389,10 +417,10 @@ def Page():
     def _jump_stage_6():
         push_to_route(router, location, "06-prodata")
 
-    if show_team_interface:
+    if GLOBAL_STATE.value.show_team_interface:
         with solara.Row():
             with solara.Column():
-                StateEditor(Marker, COMPONENT_STATE, LOCAL_STATE, LOCAL_API, show_all=False)
+                StateEditor(Marker, COMPONENT_STATE, LOCAL_STATE, LOCAL_API, show_all=not GLOBAL_STATE.value.educator)
             with solara.Column():
                 solara.Button(label="Shortcut: Jump to Stage 6", on_click=_jump_stage_6, classes=["demo-button"])
 
@@ -622,7 +650,7 @@ def Page():
                             event_set_step=uncertainty_step.set,
                             event_set_max_step_completed=uncertainty_max_step_completed.set,
                             image_location=get_image_path(router,"stage_five"),
-                            show_team_interface=show_team_interface,   
+                            show_team_interface=GLOBAL_STATE.value.show_team_interface,   
                         )
             
     #--------------------- Row 3: ALL DATA HUBBLE VIEWER - during class sequence -----------------------
@@ -692,7 +720,7 @@ def Page():
                         event_set_step=uncertainty_step.set,
                         event_set_max_step_completed=uncertainty_max_step_completed.set,
                         image_location=get_image_path(router,"stage_five"),
-                        show_team_interface=show_team_interface, 
+                        show_team_interface=GLOBAL_STATE.value.show_team_interface, 
                 )
 
     #--------------------- Row 4: OUR CLASS HISTOGRAM VIEWER -----------------------

@@ -17,7 +17,8 @@ EXAMPLE_GALAXY_SEED_DATA = "example_galaxy_seed_data"
 EXAMPLE_GALAXY_DATA = "example_galaxy"
 EXAMPLE_GALAXY_MEASUREMENTS = "example_galaxy_data"
 EXAMPLE_GALAXY_STUDENT_DATA = "example_galaxy_student_data"
-
+EXAMPLE_GALAXY_MEASUREMENTS_FIRST =  'first measurement'
+EXAMPLE_GALAXY_MEASUREMENTS_SECOND = 'second measurement'
 STUDENT_SLIDER_SUBSET_LABEL = "student_slider_subset"
 CLASS_SLIDER_SUBSET_LABEL = "class_slider_subset"
 

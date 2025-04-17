@@ -19,6 +19,7 @@ from .components.tooltip_menu import TooltipMenu
 from .logger import setup_logger
 from .utils import get_session_id
 from .components.breakpoint_watcher.breakpoint_watcher import BreakpointWatcher
+from .components.location_helper.location_helper import LocationHelper
 from .components.theme_toggle import ThemeToggle
 from .remote import BASE_API
 from .state import GLOBAL_STATE, BaseLocalState
@@ -66,44 +67,77 @@ def BaseSetup(
 
     solara.use_memo(_load_from_cache, dependencies=[])
 
+    educator_mode = False
+    if bool(auth.user.value):
+        if BASE_API.is_educator:
+            force_demo = True
+            educator_mode = True
+            Ref(GLOBAL_STATE.fields.update_db).set(False)
+            Ref(GLOBAL_STATE.fields.show_team_interface).set(True)
+            Ref(GLOBAL_STATE.fields.educator).set(True)
+
     if force_demo:
         logger.info("Loading app in demo mode.")
-        auth.user.set(
-            {
-                "userinfo": {
-                    "cds/name": "Demo User",
-                    "cds/email": "cosmicds@cfa.harvard.edu",
-                    "cds/picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
-                    "nickname": "cosmicds",
-                    "name": "Demo User",
-                    "picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
-                    "updated_at": "2025-02-06T17:47:34.507Z",
-                    "email": "cosmicds@cfa.harvard.edu",
-                    "email_verified": True,
+        if educator_mode:
+            auth.user.set(
+                {
+                    "userinfo": {
+                        "cds/name": "Demo Teacher",
+                        "cds/email": "demo_teacher@some.email",
+                        "cds/picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
+                        "nickname": "cosmicds",
+                        "name": "Demo Teacher",
+                        "picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
+                        "updated_at": "2025-02-06T17:47:34.507Z",
+                        "email": "demo_teacher@some.email",
+                        "email_verified": True,
+                    }
                 }
-            }
-        )
+            )
+        else:
+            auth.user.set(
+                {
+                    "userinfo": {
+                        "cds/name": "Demo User",
+                        "cds/email": "cosmicds@cfa.harvard.edu",
+                        "cds/picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
+                        "nickname": "cosmicds",
+                        "name": "Demo User",
+                        "picture": "https://s.gravatar.com/avatar/d49c4a758d6e45538cd0fb4cd09e91eb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fco.png",
+                        "updated_at": "2025-02-06T17:47:34.507Z",
+                        "email": "cosmicds@cfa.harvard.edu",
+                        "email_verified": True,
+                    }
+                }
+            )
         class_code.set("215")
 
-    def _get_user_info():
-        if bool(auth.user.value):
-            if BASE_API.user_exists:
-                BASE_API.load_user_info(story_name, GLOBAL_STATE)
-            elif bool(class_code.value):
-                BASE_API.create_new_user(story_name, class_code.value, GLOBAL_STATE)
-            else:
-                logger.error("User is authenticated, but does not exist.")
-                router.push(auth.get_logout_url())
-                location = solara.use_context(solara.routing._location_context)
-                location.pathname = auth.get_logout_url()
+    if bool(auth.user.value):
+        logger.debug("User is authenticated.")
+        if BASE_API.user_exists:
+            BASE_API.load_user_info(story_name, GLOBAL_STATE)
+        elif bool(class_code.value):
+            BASE_API.create_new_user(story_name, class_code.value, GLOBAL_STATE)
         else:
-            logger.info("User has not authenticated.")
-            BASE_API.clear_user(GLOBAL_STATE)
-
-            login_dialog = Login(active, class_code, update_db, debug_mode)
-            active.set(True)
-
-    solara.use_memo(_get_user_info, dependencies=[auth.user.value])
+            logger.error("User is authenticated, but does not exist.")
+            router.push(auth.get_logout_url())
+    elif not bool(auth.user.value):
+        logger.debug("User has not authenticated.")
+        BASE_API.clear_user(GLOBAL_STATE)
+        origin_split = settings.main.base_url.split("//")
+        root_url = "//".join(
+            [
+                origin_split[0],
+                "/".join(
+                    [
+                        x
+                        for x in origin_split[1].split("/")
+                        if x not in router.root_path.split("/")
+                    ]
+                ),
+            ]
+        )
+        LocationHelper(url=root_url)
 
 
 def BaseLayout(
@@ -121,6 +155,7 @@ def BaseLayout(
     router = solara.use_router()
     route_current, routes_current_level = solara.use_route(peek=True)
     route_index = routes_current_level.index(route_current)
+    location = solara.use_context(solara.routing._location_context)
 
     selected_link = solara.use_reactive(route_index)
 
@@ -129,6 +164,19 @@ def BaseLayout(
     BreakpointWatcher(
         event_set_breakpoint_info=lambda event: break_point.set(event["breakpoint"])
     )
+
+    def _change_local_url():
+        if selected_link.value is None:
+            return
+
+        path = routes_current_level[selected_link.value].path
+
+        if path != "/":
+            router.push(f"{router.root_path}/{path}")
+        else:
+            location.pathname = settings.main.base_url
+
+    solara.use_memo(_change_local_url, dependencies=[selected_link.value])
 
     @solara.lab.computed
     def display_info():
@@ -175,7 +223,13 @@ def BaseLayout(
         #     children=["Cosmic Data Story"],
         #     class_="ml-8 app-title",
         # )
-
+        if GLOBAL_STATE.value.educator:
+            rv.Html(
+                tag="h3",
+                class_="ml-8 app-title",
+                children=["Educator Mode"],
+                style_="color: #8e8e8e; font-size: 1.5em; font-weight: bold;",
+            )
         rv.Spacer()
 
         with TooltipMenu(
@@ -278,6 +332,14 @@ def BaseLayout(
                                                 dense=True,
                                                 hide_details=True,
                                             ),
+                                            # rv.Divider(),
+                                            # rv.Btn(
+                                            #     href=auth.get_logout_url(), icon=False,
+                                            #     block=True, outlined=True,
+                                            #     class_="mt-2",
+                                            #     # children=[rv.Icon(children=["mdi-logout"])]
+                                            #     children=["Logout"],
+                                            # ),
                                         ]
                                     ),
                                 ],
@@ -288,28 +350,22 @@ def BaseLayout(
             }
         ],
     ) as navigation_drawer:
+        if break_point.value in ["xs", "sm", "md"]:
+            with rv.Row(class_="flex justify-end pa-2 ml-0"):
+                solara.IconButton(
+                    "mdi-close",
+                    on_click=lambda: drawer.set(False),
+                    right=True,
+                    x_small=True,
+                )
+
         with rv.List(
             nav=True,
         ):
-            if break_point.value in ["xs", "sm", "md"]:
-                with rv.Row(class_="flex justify-end pb-2 ml-0"):
-                    solara.IconButton(
-                        "mdi-close",
-                        on_click=lambda: drawer.set(False),
-                        right=True,
-                        x_small=True,
-                    )
-
             with rv.ListItemGroup(
-                value=selected_link.value,
+                v_model=selected_link.value,
+                on_v_model=selected_link.set,
             ):
-
-                def _change_local_url(path, location):
-                    if path != "/":
-                        router.push(f"{router.root_path}{path}")
-                    else:
-                        location.pathname = settings.main.base_url
-
                 for i, route in enumerate(routes_current_level):
                     disabled = False
                     if local_state is not None:
@@ -318,10 +374,7 @@ def BaseLayout(
                             and i > local_state.value.max_route_index
                         )
 
-                    with rv.ListItem(
-                        disabled=disabled,
-                        inactive=disabled,
-                    ) as list_item:
+                    with rv.ListItem(disabled=disabled, inactive=disabled) as list_item:
                         with rv.ListItemIcon(class_="mr-4"):
                             rv.Icon(children=f"mdi-numeric-{i}-circle")
 
@@ -332,18 +385,6 @@ def BaseLayout(
                             rv.ListItemTitle(
                                 children=f"{route.label if route.path != '/' else 'Introduction'}"
                             )
-
-                    solara.v.use_event(
-                        list_item,
-                        "click",
-                        lambda *args, path=solara.resolve_path(
-                            route
-                        ), location=solara.use_context(
-                            solara.routing._location_context
-                        ): _change_local_url(
-                            path, location
-                        ),
-                    )
 
     with rv.Content(class_="solara-content-main", style_="height: 100%"):
         with rv.Container(

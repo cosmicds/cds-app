@@ -49,20 +49,25 @@ from ...utils import (
     get_image_path,
 )
 from ...example_measurement_helpers import (
-    create_example_subsets,
-    link_example_seed_and_measurements,
-    _update_second_example_measurement,
-    load_and_create_seed_data,
+    assert_example_measurements_in_glue
 )
+
+from ...stage_one_and_three_setup import (
+    initialize_second_example_measurement,
+    _add_or_update_example_measurements_to_glue,
+    _glue_setup,
+    _update_seed_data_with_examples,
+)
+
+from ...demo_helpers import (set_dummy_wavelength_and_velocity,
+                                   set_dummy_all_measurements,
+                                   set_dummy_wavelength)
 
 logger = setup_logger("STAGE")
 
 GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
 
-EXAMPLE_GALAXY_MEASUREMENTS_FIRST = EXAMPLE_GALAXY_MEASUREMENTS + '_first'
-EXAMPLE_GALAXY_MEASUREMENTS_SECOND = EXAMPLE_GALAXY_MEASUREMENTS + '_second'
 
-show_team_interface = GLOBAL_STATE.value.show_team_interface
 
 def is_wavelength_poorly_measured(measwave, restwave, z, tolerance = 0.5):
     z_meas =  (measwave - restwave) / restwave
@@ -123,22 +128,27 @@ def Page():
     solara.lab.use_task(_write_component_state, dependencies=[COMPONENT_STATE.value])
     
     seed_data_setup = solara.use_reactive(False)
-    def _glue_setup() -> JupyterApplication:
-        # NOTE: use_memo has to be part of the main page render. Including it
-        #  in a conditional will result in an error.
-        gjapp = JupyterApplication(
-            GLOBAL_STATE.value.glue_data_collection, GLOBAL_STATE.value.glue_session
-        )
-
+    def glue_setup() -> JupyterApplication:
+        gjapp = _glue_setup()
         if EXAMPLE_GALAXY_SEED_DATA not in gjapp.data_collection:
-            load_and_create_seed_data(gjapp, LOCAL_STATE)
+            logger.error(
+                f"Missing {EXAMPLE_GALAXY_SEED_DATA} in glue data collection."
+            )
+        else:
             seed_data_setup.set(True)
         return gjapp
+    
 
-    gjapp = solara.use_memo(_glue_setup, dependencies=[])
+    gjapp = solara.use_memo(glue_setup, dependencies=[])
+    
+    example_data_setup = solara.use_reactive(False)
+    def add_or_update_example_measurements_to_glue():
+        if (gjapp is not None):
+            _add_or_update_example_measurements_to_glue(gjapp)
+            assert_example_measurements_in_glue(gjapp)
+            example_data_setup.set(True)
 
-    def add_or_update_data(data: Data):
-        return _add_or_update_data(gjapp, data)
+
 
     def _state_callback_setup():
         # We want to minize duplicate state handling, but also keep the states
@@ -149,6 +159,30 @@ def Page():
         measurements.subscribe_change(
             lambda *args: total_galaxies.set(len(measurements.value))
         )
+        
+        example_measurements = Ref(LOCAL_STATE.fields.example_measurements)
+        def _on_example_measurement_change(meas):
+            # make sure the 2nd one is initialized
+            initialize_second_example_measurement()
+            
+            # make sure it is in glue
+            add_or_update_example_measurements_to_glue()
+
+            # make sure it is in the seed data
+            _update_seed_data_with_examples(gjapp, meas)
+            
+        example_measurements.subscribe(
+            _on_example_measurement_change
+        )
+        
+        def _on_marker_updated(marker):
+            if COMPONENT_STATE.value.current_step.value >= Marker.rem_vel1.value:
+                initialize_second_example_measurement() # either set them to current or keep from DB
+            if COMPONENT_STATE.value.current_step_between(Marker.mee_gui1, Marker.sel_gal4):
+                selection_tool_bg_count.set(selection_tool_bg_count.value + 1)
+
+        Ref(COMPONENT_STATE.fields.current_step).subscribe(_on_marker_updated)
+
 
     solara.use_memo(_state_callback_setup, dependencies=[])
 
@@ -166,124 +200,24 @@ def Page():
     def selected_measurement():
         return Ref(LOCAL_STATE.fields.get_measurement).value(Ref(COMPONENT_STATE.fields.selected_galaxy).value)
     
-    def add_link(from_dc_name, from_att, to_dc_name, to_att):
-        _add_link(gjapp, from_dc_name, from_att, to_dc_name, to_att)
 
-    def _update_seed_data_with_examples(example_data):
-
-        label = EXAMPLE_GALAXY_SEED_DATA + "_first"
-        if label not in gjapp.data_collection:
-            return 
-
-        student = Ref(GLOBAL_STATE.fields.student)
-        data = gjapp.data_collection[label]
-        keep = data[STUDENT_ID_COMPONENT] != student.value.id
-        update = {
-            c.label: list(data[c][keep])
-            for c in data.main_components
-        }
-
-        examples_count = len(example_data)
-        if examples_count == 1:
-            measurement = example_data[0]
-        elif examples_count >= 2:
-            numbers = ("first", "second")
-            measurement = \
-                sorted(example_data,
-                       key=lambda v: numbers.index(v.measurement_number) if v.measurement_number in numbers else len(numbers)
-                )[1]
-
-            for component in data.main_components:
-                value = getattr(measurement, component.label, None)
-                if value is None:
-                    value = float('nan')
-                update[component.label].append(value)
-
-        new_data = Data(label=data.label, **update)
-        data.update_values_from_data(new_data)
-
-    
-
-
-    def update_second_example_measurement():
-        example_measurements = Ref(LOCAL_STATE.fields.example_measurements)
-        if len(example_measurements.value) < 2:
-            logger.info('No second example measurement to update')
-            return
-        
-        changed, updated = _update_second_example_measurement(example_measurements.value)
-        logger.info('Updating second example measurement')
-        
-        if changed != '':
-            logger.info(f'\t\t setting example_measurements: {changed}')
-            example_measurements.set([example_measurements.value[0], updated])
-        else:
-            logger.info('\t\t no changes for second measurement')
-    
-    example_data_setup = solara.use_reactive(False)
-    def add_example_measurements_to_glue():
-        logger.info('in add_example_measurements_to_glue')
-        if len(LOCAL_STATE.value.example_measurements) > 0:
-            logger.info(f'has {len(LOCAL_STATE.value.example_measurements)} example measurements')
-            example_measurements_glue = models_to_glue_data(
-                LOCAL_STATE.value.example_measurements,
-                label=EXAMPLE_GALAXY_MEASUREMENTS,
-            )
-            example_measurements_glue.style.color = MY_DATA_COLOR
-            create_example_subsets(gjapp, example_measurements_glue)
-
-            use_this = add_or_update_data(example_measurements_glue)
-            use_this.style.color = MY_DATA_COLOR
-
-            link_example_seed_and_measurements(gjapp)
-            example_data_setup.set(True)
-        else:
-            logger.info('no example measurements yet')
-
-    
-    def _glue_sync_setup():
-        logger.info('running _glue_sync_setup')
+    def _init_glue_data_setup():
+        logger.info("The glue data use effect")
         if Ref(LOCAL_STATE.fields.measurements_loaded).value:
-            add_example_measurements_to_glue()
-            update_second_example_measurement()
+            add_or_update_example_measurements_to_glue()
+            initialize_second_example_measurement()
 
-    solara.use_memo(_glue_sync_setup, dependencies=[Ref(LOCAL_STATE.fields.measurements_loaded).value])
-    example_measurements = Ref(LOCAL_STATE.fields.example_measurements)
-    example_measurements.subscribe(lambda *args: _glue_sync_setup())
-    example_measurements.subscribe(_update_seed_data_with_examples)
-
+    solara.use_effect(_init_glue_data_setup, dependencies=[Ref(LOCAL_STATE.fields.measurements_loaded).value])
     selection_tool_bg_count = solara.use_reactive(0)
 
     def _fill_galaxies():
-        dummy_measurements = LOCAL_API.get_dummy_data()
-        measurements = []
-        for measurement in dummy_measurements:
-            measurements.append(StudentMeasurement(student_id=GLOBAL_STATE.value.student.id,
-                                                   galaxy=measurement.galaxy,
-                                                   obs_wave_value=measurement.obs_wave_value,
-                                                   velocity_value=measurement.velocity_value,
-                                                   ang_size_value=measurement.ang_size_value,
-                                                   est_dist_value=measurement.est_dist_value))
-        Ref(LOCAL_STATE.fields.measurements).set(measurements)
+        set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
 
     def _fill_lambdas():
-        dummy_measurements = LOCAL_API.get_dummy_data()
-        measurements = []
-        for measurement in dummy_measurements:
-            measurements.append(StudentMeasurement(student_id=GLOBAL_STATE.value.student.id,
-                                                   obs_wave_value=measurement.obs_wave_value,
-                                                   galaxy=measurement.galaxy))
-        Ref(LOCAL_STATE.fields.measurements).set(measurements)
+        set_dummy_wavelength(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
 
     def _fill_stage1_go_stage2():
-        dummy_measurements = LOCAL_API.get_dummy_data()
-        measurements = []
-        for measurement in dummy_measurements:
-            measurements.append(StudentMeasurement(student_id=GLOBAL_STATE.value.student.id,
-                                                   obs_wave_value=measurement.obs_wave_value,
-                                                   galaxy=measurement.galaxy,
-                                                   velocity_value=measurement.velocity_value))
-        Ref(LOCAL_STATE.fields.measurements).set(measurements)
+        set_dummy_wavelength_and_velocity(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
         push_to_route(router, location, f"02-distance-introduction")
 
     def _select_random_galaxies():
@@ -370,25 +304,25 @@ def Page():
         if len(LOCAL_STATE.value.example_measurements) > 0:
             lambda_rest = LOCAL_STATE.value.example_measurements[0].rest_wave_value
             lambda_obs = v2w(velocity, lambda_rest)
-            print(f'sync_example_velocity_to_wavelength {velocity:0.2f} -> {lambda_obs:0.2f}')
+            logger.debug(f'sync_example_velocity_to_wavelength {velocity:0.2f} -> {lambda_obs:0.2f}')
             return lambda_obs
     
     def sync_example_wavelength_to_velocity(wavelength):
         if len(LOCAL_STATE.value.example_measurements) > 0:
             lambda_rest = LOCAL_STATE.value.example_measurements[0].rest_wave_value
             velocity = w2v(wavelength, lambda_rest)
-            print(f'sync_example_wavelength_to_velocity {wavelength:0.2f} -> {velocity:0.2f}')
+            logger.debug(f'sync_example_wavelength_to_velocity {wavelength:0.2f} -> {velocity:0.2f}')
             return velocity
     
     def sync_spectrum_to_dotplot_range(value):
         if len(LOCAL_STATE.value.example_measurements) > 0:
-            logger.info('Setting dotplot range from spectrum range')
+            logger.debug('Setting dotplot range from spectrum range')
             lambda_rest = LOCAL_STATE.value.example_measurements[0].rest_wave_value
             return [w2v(v, lambda_rest) for v in value]
     
     def sync_dotplot_to_spectrum_range(value):
         if len(LOCAL_STATE.value.example_measurements) > 0:
-            logger.info('Setting spectrum range from dotplot range')
+            logger.debug('Setting spectrum range from dotplot range')
             lambda_rest = LOCAL_STATE.value.example_measurements[0].rest_wave_value
             return [v2w(v, lambda_rest) for v in value]
 
@@ -415,18 +349,12 @@ def Page():
     speech = Ref(GLOBAL_STATE.fields.speech)
 
 
-    def _on_marker_updated(marker):
-        if COMPONENT_STATE.value.current_step.value >= Marker.rem_vel1.value:
-            update_second_example_measurement() # either set them to current or keep from DB
-        if COMPONENT_STATE.value.current_step_between(Marker.mee_gui1, Marker.sel_gal4):
-            selection_tool_bg_count.set(selection_tool_bg_count.value + 1)
 
-    Ref(COMPONENT_STATE.fields.current_step).subscribe(_on_marker_updated)
 
-    if show_team_interface:
+    if GLOBAL_STATE.value.show_team_interface:
         with rv.Row():
             with solara.Column():
-                StateEditor(Marker, COMPONENT_STATE, LOCAL_STATE, LOCAL_API, show_all=True)
+                StateEditor(Marker, COMPONENT_STATE, LOCAL_STATE, LOCAL_API, show_all=not GLOBAL_STATE.value.educator)
             with solara.Column():
                 solara.Button(label="Shortcut: Fill in galaxy velocity data & Jump to Stage 2", on_click=_fill_stage1_go_stage2, classes=["demo-button"])
                 solara.Button(label="Choose 5 random galaxies", on_click=_select_random_galaxies, classes=["demo-button"])
@@ -610,7 +538,7 @@ def Page():
             show_values = Ref(COMPONENT_STATE.fields.show_dop_cal4_values)
             
             def _on_validate_transition(validated):
-                logger.info("Validated transition to dop_cal5: %s", validated)
+                logger.debug("Validated transition to dop_cal5: %s", validated)
                 validation_4_failed.set(not validated)
                 show_values.set(validated)
                 if not validated:
@@ -620,7 +548,7 @@ def Page():
                     transition_to(COMPONENT_STATE, Marker.dop_cal5)
 
                 show_doppler_dialog = Ref(COMPONENT_STATE.fields.show_doppler_dialog)
-                logger.info("Setting show_doppler_dialog to %s", validated)
+                logger.debug("Setting show_doppler_dialog to %s", validated)
                 show_doppler_dialog.set(validated)
 
             
@@ -680,8 +608,6 @@ def Page():
                         )
                     )
                     
-                    if COMPONENT_STATE.value.current_step.value == Marker.rem_vel1.value:
-                        add_example_measurements_to_glue()
 
                 DopplerSlideshow(
                     dialog=COMPONENT_STATE.value.show_doppler_dialog,
@@ -714,7 +640,7 @@ def Page():
                         ),
                         "score_tag": "interpret-velocity",
                     },
-                    show_team_interface=show_team_interface,
+                    show_team_interface=GLOBAL_STATE.value.show_team_interface,
                 )
             ScaffoldAlert(
                 GUIDELINE_ROOT / "GuidelineCheckMeasurement.vue",
@@ -751,7 +677,7 @@ def Page():
                 },
                 speech=speech.value,
             )
-            if show_team_interface:
+            if GLOBAL_STATE.value.show_team_interface:
                 if COMPONENT_STATE.value.is_current_step(Marker.rem_gal1):
                     solara.Button(label="DEMO SHORTCUT: FILL λ MEASUREMENTS", on_click=_fill_lambdas, style="text-transform: none;", classes=["demo-button"])
             ScaffoldAlert(
@@ -831,7 +757,7 @@ def Page():
                 
                 
                 common_headers = [
-                                    {"text": "Galaxy Name", "align": "start","sortable": False,"value": "name",},
+                                    {"text": "Galaxy ID", "align": "start","sortable": False,"value": "name",},
                                     {"text": "Element", "value": "element"},
                                     {"text": "&lambda;<sub>rest</sub> (&Aring;)",
                                      "value": "rest_wave_value"},
@@ -840,7 +766,7 @@ def Page():
                                     {"text": "Velocity (km/s)", "value": "velocity_value"},
                                 ]
                 if use_second_measurement.value:
-                    measnum_header = {"text": "Measurement Number", "value": "measurement_number"}
+                    measnum_header = {"text": "Measurement", "value": "measurement_number"}
                     common_headers.append(measnum_header)
 
                 
@@ -954,7 +880,7 @@ def Page():
                             COMPONENT_STATE.fields.show_dotplot_tutorial_dialog
                         ).set(v),
                         event_set_step = Ref(COMPONENT_STATE.fields.dotplot_tutorial_state.step).set,
-                        show_team_interface=show_team_interface,
+                        show_team_interface=GLOBAL_STATE.value.show_team_interface,
                     )
                 
     # Dot Plot 1st measurement row
@@ -1263,10 +1189,10 @@ def Page():
                         # obs_wave.set(value)
                         
                     def _on_set_marker_location(value):
-                        logger.info('Setting marker location spectrum -> dotplot')
+                        logger.debug('Setting marker location spectrum -> dotplot')
                         velocity = sync_example_wavelength_to_velocity(value)
                         if velocity:
-                            logger.info(f'Setting velocity {velocity: 0.2f} ')
+                            logger.debug(f'Setting velocity {velocity: 0.2f} ')
                             sync_velocity_line.set(velocity)
 
                     obs_wave_tool_used = Ref(COMPONENT_STATE.fields.obs_wave_tool_used)
@@ -1406,7 +1332,7 @@ def Page():
                                     True
                                 ),
                                 image_location=get_image_path(router, "stage_one_spectrum"),
-                                show_team_interface=show_team_interface,
+                                show_team_interface=GLOBAL_STATE.value.show_team_interface,
                             )
                 
                 if COMPONENT_STATE.value.current_step_at_or_after(Marker.ref_dat1): # space 2 buttons nicely
@@ -1414,7 +1340,7 @@ def Page():
                         with rv.Col(cols=4, offset=2):
                             SpectrumSlideshow(
                                 image_location=get_image_path(router, "stage_one_spectrum"),
-                                show_team_interface=show_team_interface,
+                                show_team_interface=GLOBAL_STATE.value.show_team_interface,
                             )
                         with rv.Col(cols=4):
                             show_reflection_dialog = Ref(
@@ -1466,5 +1392,5 @@ def Page():
                                 event_on_reflection_complete=lambda _: reflection_complete.set(
                                     True
                                 ),
-                                show_team_interface=show_team_interface,
+                                show_team_interface=GLOBAL_STATE.value.show_team_interface,
                             )

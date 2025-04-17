@@ -4,7 +4,7 @@ from typing import Callable
 
 DEFAULT_HEADERS = [
     {
-        "text": "Galaxy Name",
+        "text": "Galaxy ID",
         "align": "start",
         "sortable": False,
         "value": "name",

@@ -18,6 +18,7 @@ def Stage2Slideshow (
     event_set_max_step_completed,
     event_mc_callback,
     state_view,
+    event_return_to_stage1,
     event_slideshow_finished,
     speech,
 ):

@@ -16,7 +16,10 @@
     </p>
 
     <p>
-      Does your class's age estimate agree with Hubble's age estimate? It might help to show <b>fit lines to data</b> (using <v-icon>mdi-chart-timeline-variant</v-icon>).
+      Does your class's age estimate agree with Hubble's age estimate? 
+    </p>
+    <p>
+      Hint: Remember that we estimated the age of the universe from the slope of the best-fit line to our data, so we can compare age estimates from two different data sets by comparing the slopes. 
     </p>
 
     <v-container
@@ -30,7 +33,7 @@
             'I\'m not sure',
           ]"
           :feedbacks="[
-            'Remember, the slope of the line is related to the age measurement from this data. Are the slopes the same?',
+            'The slope of the line is related to the age measurement from this data. Are the slopes the same?',
             'Correct. The best fit lines for our data and Edwin Hubble\'s data have very different slopes, so they have different ages.',
             'The slope of the line is related to the age measurement from this data. Are the slopes the same?']"
           :incorrect-answers="[0]"

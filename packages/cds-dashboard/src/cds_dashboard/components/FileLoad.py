@@ -45,7 +45,6 @@ def TableLoad(file_info = None, load_complete = None, allow_excel = False):
                         
             * Include a header row with column names 'student_id' and 'name'. 
             * To protect student privacy, this information remains on your computer and will NOT be uploaded to CosmicDS servers.
-            * You can load a single name file that includes students from multiple classes, and they will be applied when the relevant class is viewed. (If you use separate name files for each class, you will need to reload the file every time you toggle between classes).
         ''')
         if not load_complete.value:
             solara.FileDrop(

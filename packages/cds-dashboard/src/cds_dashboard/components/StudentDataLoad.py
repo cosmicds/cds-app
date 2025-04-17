@@ -75,7 +75,7 @@ def StudentLoadDialog(student_names = None, student_names_set = None, dialog_ope
     )
     comp = dialog if not no_dialog else solara.Div()
     with comp:
-        with solara.Card(classes=["my-cards"]):
+        with solara.Card(classes=["dash-card"]):
             StudentDataLoadInterface(student_names, table_set = student_names_set)
             
             table_valid.set(validator(student_names.value))
@@ -95,7 +95,7 @@ def StudentLoadDialog(student_names = None, student_names_set = None, dialog_ope
             
                 
             with solara.CardActions():
-                solara.Button(icon_name="mdi-close-circle",label = "Close", on_click = lambda: dialog_open.set(False), text=True, outlined=True, classes=["dialog-button"])
+                solara.Button(icon_name="mdi-close-circle",label = "Close", on_click = lambda: dialog_open.set(False), text=True, outlined=True, classes=["dash-dialog-button"])
 
 
 def validate_table(table, required_sids):

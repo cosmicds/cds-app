@@ -11,6 +11,8 @@ from .state import GLOBAL_STATE, UserType
 from .remote import BASE_API
 from .components.hero import Hero
 from .components.setup_dialog import UserTypeSetup
+from cds_core.components.theme_toggle import ThemeToggle
+
 
 IMG_PATH = Path("static") / "public" / "images"
 
@@ -20,16 +22,17 @@ def Layout(children=[]):
     router = solara.use_router()
     route_current, routes = solara.use_route()
     show_menu = solara.use_reactive(False)
+    setup_finished = Ref(GLOBAL_STATE.fields.initial_setup_finished)
 
     def _check_user_status():
-        if (info := BASE_API.student_info):
-            Ref(GLOBAL_STATE.fields.user.user_type).set(UserType.student)
-            Ref(GLOBAL_STATE.fields.user.id).set(info["id"])
-        elif (info := BASE_API.educator_info):
+        if (info := BASE_API.educator_info) is not None:
             Ref(GLOBAL_STATE.fields.user.user_type).set(UserType.educator)
             Ref(GLOBAL_STATE.fields.user.id).set(info["id"])
+        elif (info := BASE_API.student_info) is not None:
+            Ref(GLOBAL_STATE.fields.user.user_type).set(UserType.student)
+            Ref(GLOBAL_STATE.fields.user.id).set(info["id"])
 
-    solara.use_effect(_check_user_status, [])
+    solara.use_effect(_check_user_status, [setup_finished.value])
 
     @solara.lab.computed
     def user_typename():
@@ -50,7 +53,10 @@ def Layout(children=[]):
                 with solara.Link(solara.resolve_path("/")):
                     with rv.Avatar(class_="mr-8", width="60", tile=True):
                         rv.Img(
-                            src=str(IMG_PATH / "cosmicds_logo_transparent_for_dark_backgrounds.webp"),
+                            src=str(
+                                IMG_PATH
+                                / "cosmicds_logo_transparent_for_dark_backgrounds.webp"
+                            ),
                         )
 
                 solara.Button(
@@ -84,7 +90,13 @@ def Layout(children=[]):
                     if not (BASE_API.student_info or BASE_API.educator_info):
                         UserTypeSetup()
 
-                    solara.lab.ThemeToggle()
+                    ThemeToggle(
+                        on_icon="mdi-brightness-4",  # dark mode icon
+                        off_icon="mdi-brightness-4",  # light mode icon
+                        enable_auto=False,
+                        default_theme="dark",
+                        enforce_default=True,
+                    )
                     # rv.Btn(icon=True, children=[rv.Icon(children=["mdi-bell"])])
 
                     with rv.Menu(
@@ -139,14 +151,14 @@ def Layout(children=[]):
                                             f"{auth.user.value['userinfo'].get('cds/email', '')}"
                                         ]
                                     )
-                                ) 
+                                )
                             user_menu_list.append(
                                 rv.ListItemSubtitle(
                                     children=[
                                         f"{user_typename.value} ID: {user_id.value}"
                                     ]
                                 )
-                            )      
+                            )
                             with rv.ListItem():
                                 rv.ListItemAvatar(
                                     children=[
@@ -221,8 +233,11 @@ def Layout(children=[]):
                                 on_click=lambda: router.push("/"),
                                 href=auth.get_logout_url("/"),
                             )
-                    if user_typename.value == "Student":
-                        solara.Text (f"{user_typename.value} ID: {user_id.value}", classes=["ml-4"])
+                    if user_typename.value == "Student" and user_id.value is not None:
+                        solara.Text(
+                            f"{user_typename.value} ID: {user_id.value}",
+                            classes=["ml-4"],
+                        )
 
         with rv.Content():
             if route_current.path == "/":
@@ -238,9 +253,9 @@ def Layout(children=[]):
         with rv.Footer(
             app=False,
             padless=True,
-            # style_="background: none !important;",
+            style_="background-color: #272727 !important; color: white !important;",
         ):
-            with rv.Container(style="background: none; max-width: 1200px"):
+            with rv.Container(style="max-width: 1200px"):
 
                 with rv.Row():
                     with rv.Col(cols=4):
@@ -256,7 +271,9 @@ def Layout(children=[]):
 
                     with rv.Col(cols=4):
                         rv.Img(
-                            src=str(IMG_PATH / "NASA_Partner_color_300_no_outline.webp"),
+                            src=str(
+                                IMG_PATH / "NASA_Partner_color_300_no_outline.webp"
+                            ),
                             contain=True,
                             height="100",
                         )
@@ -280,7 +297,7 @@ def Layout(children=[]):
                             classes=["caption mb-4"],
                         )
                         solara.Text(
-                            "Copyright © 2024 The President and Fellows of Harvard College",
+                            "Copyright © 2025 The President and Fellows of Harvard College",
                         )
 
     return main

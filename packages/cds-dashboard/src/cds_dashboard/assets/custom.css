@@ -88,9 +88,10 @@
     min-width: 200px;
 }
 
-.cds-dashboard .my-cards {
+.dash-card {
     max-width: 98%;
     padding: 10px;
+    border: 1px solid var(--info) !important;
 }
 
 .cds-dashboard .v-dialog {
@@ -101,7 +102,7 @@
     margin-block: 10px;
 }
 
-.cds-dashboard .dialog-button {
+.dash-dialog-button {
     position:absolute;
     right: 1.5rem;
     bottom: 0.5rem;

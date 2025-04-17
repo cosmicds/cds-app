@@ -3,6 +3,8 @@ from glue.core import Data
 from glue_jupyter import JupyterApplication
 from .data_management import (
     EXAMPLE_GALAXY_MEASUREMENTS, 
+    EXAMPLE_GALAXY_MEASUREMENTS_FIRST,
+    EXAMPLE_GALAXY_MEASUREMENTS_SECOND,
     EXAMPLE_GALAXY_SEED_DATA,
     DB_VELOCITY_FIELD,
     DB_MEASWAVE_FIELD,
@@ -72,7 +74,7 @@ def link_seed_data(gjapp):
         #     _add_link(gjapp, egsd, DB_DISTANCE_FIELD, second, DB_DISTANCE_FIELD)
 
 
-def _update_second_example_measurement(example_measurements: list[StudentMeasurement]):
+def _init_second_example_measurement(example_measurements: list[StudentMeasurement]):
         changed = ''
         if len(example_measurements) == 2:
             first = example_measurements[0]
@@ -136,3 +138,18 @@ def load_and_create_seed_data(gjapp: JupyterApplication, local_state: Reactive[L
     gjapp.data_collection.append(tutorial)
     
     link_seed_data(gjapp)
+    
+from .utils import subset_by_label
+def assert_example_measurements_in_glue(gjapp: JupyterApplication):
+    if EXAMPLE_GALAXY_MEASUREMENTS not in gjapp.data_collection:
+        raise ValueError(
+            f"Missing {EXAMPLE_GALAXY_MEASUREMENTS} in glue data collection."
+        )
+    if subset_by_label(gjapp.data_collection[EXAMPLE_GALAXY_MEASUREMENTS], EXAMPLE_GALAXY_MEASUREMENTS_FIRST) is None:
+        raise ValueError(
+            f"Missing {EXAMPLE_GALAXY_MEASUREMENTS_FIRST} in glue data collection."
+        )
+    if subset_by_label(gjapp.data_collection[EXAMPLE_GALAXY_MEASUREMENTS], EXAMPLE_GALAXY_MEASUREMENTS_SECOND) is None:
+        raise ValueError(
+            f"Missing {EXAMPLE_GALAXY_MEASUREMENTS_SECOND} in glue data collection."
+        )

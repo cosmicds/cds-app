@@ -27,6 +27,10 @@ def Layout(children=[]):
     route_index = routes_current_level.index(route_current)
 
     def _load_global_local_states():
+        # Force reset global and local states
+        logger.info("Clearing local states.")
+        LOCAL_STATE.set(LOCAL_STATE.value.__class__())
+
         if student_id.value is None:
             logger.warning(
                 f"Failed to load measurements: ID `{GLOBAL_STATE.value.student.id}` not found."

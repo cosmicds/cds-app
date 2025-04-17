@@ -168,4 +168,5 @@ def Page():
                             ],
                         },
                     ],
+                    hide_default_footer=True,
                 )

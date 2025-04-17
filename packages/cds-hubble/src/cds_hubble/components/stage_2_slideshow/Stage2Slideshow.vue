@@ -780,7 +780,16 @@
       class="justify-space-between"
     >
       <v-btn
-        :disabled="step === 0"
+        v-if="step === 0"
+        class="black--text"
+        color="accent"
+        depressed
+        @click="return_to_stage1();"
+      >
+        Stage 1
+      </v-btn>
+      <v-btn
+        v-else
         class="black--text"
         color="accent"
         depressed

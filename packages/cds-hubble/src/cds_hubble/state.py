@@ -92,6 +92,15 @@ class StudentMeasurement(BaseModel):
     # @property
     # def last_modified(self) -> str:
     #     return f"{datetime.datetime.now(datetime.UTC)}"
+    @property
+    def completed(self) -> bool:
+        return (
+            self.obs_wave_value is not None
+            and self.velocity_value is not None
+            and self.ang_size_value is not None
+            and self.est_dist_value is not None
+        )
+    
 
 
 class BaseSummary(BaseModel):
@@ -200,7 +209,7 @@ from typing import TypeVar
 BaseComponentStateT = TypeVar('BaseComponentStateT', bound='BaseComponentState')
 
 def get_free_response(local_state: Reactive[LocalState], component_state: Reactive[BaseComponentStateT], tag: str):
-    logger.info(f"Getting Free Response for tag: {tag}")
+    logger.debug(f"Getting Free Response for tag: {tag}")
     # check if the question present
     if tag in local_state.value.free_responses['responses']:
         
@@ -224,7 +233,7 @@ def fix_free_responses_stage_missing(tag, local_state: Reactive[LocalState], com
         
         
 def get_multiple_choice(local_state: Reactive[LocalState], component_state: Reactive[BaseComponentStateT], tag: str):
-    logger.info(f"Getting MC Score for tag: {tag}")
+    logger.debug(f"Getting MC Score for tag: {tag}")
     if tag in local_state.value.mc_scoring['scores']:
         if 'stage' not in local_state.value.mc_scoring['scores'][tag]:
             new = local_state.value.mc_scoring['scores'][tag]
@@ -251,13 +260,12 @@ def mc_callback(
 
     mc_scoring = Ref(local_state.fields.mc_scoring).value.copy()['scores']
     piggybank_total = Ref(local_state.fields.piggybank_total)
-    logger.info(f"MC Callback Event: {event[0]}")
 
     # mc-initialize-callback returns data which is a string
     if event[0] == "mc-initialize-response":
         # check for a missing tag
         if event[1] not in mc_scoring.keys():
-            logger.info(f"Initializing MC Score for tag: {event[1]}")
+            logger.debug(f"Initializing MC Score for tag: {event[1]}")
             new_score = dict(
                 tag=event[1], 
                 score=None, 
@@ -312,9 +320,9 @@ def fr_callback(
     
     free_responses = Ref(local_state.fields.free_responses).value.copy()['responses']
     
-    logger.info(f"Free Response Callback Event: {event[0]}")
     if event[0] == "fr-initialize":
         if event[1]["tag"] not in free_responses.keys():
+            logger.debug(f"Initializing Free Response for tag: {event[1]['tag']}")
             new = dict(tag=event[1]["tag"], response="", initialized=True, stage=component_state.value.stage_id)
             free_responses = {**free_responses, event[1]["tag"]: new }
             Ref(local_state.fields.free_responses).set({'responses': free_responses})

@@ -96,6 +96,11 @@ class LocalAPI(BaseAPI):
             f"{self.API_URL}/{local_state.value.story_id}/measurements/"
             f"{global_state.value.student.id}"
         )
+        if not global_state.value.update_db or self.is_educator:
+            Ref(local_state.fields.measurements_loaded).set(True)
+            logger.info("Skipping retrieval of measurements from database.")
+            return []
+        
         r = self.request_session.get(url)
             
         measurements = Ref(local_state.fields.measurements)
@@ -119,12 +124,16 @@ class LocalAPI(BaseAPI):
     def get_sample_measurements(
         self, global_state: Reactive[GlobalState], local_state: Reactive[LocalState]
     ) -> list[StudentMeasurement]:
-        r = self.request_session.get(
-            f"{self.API_URL}/{local_state.value.story_id}/sample-"
-            f"measurements/{global_state.value.student.id}"
-        )
+        
+        if not global_state.value.update_db or self.is_educator:
+            sample_measurement_json = {"measurements": []}
+        else:
+            r = self.request_session.get(
+                f"{self.API_URL}/{local_state.value.story_id}/sample-"
+                f"measurements/{global_state.value.student.id}"
+            )
 
-        sample_measurement_json = r.json()
+            sample_measurement_json = r.json()
 
         if len(sample_measurement_json["measurements"]) == 0:
             logger.info(
@@ -171,7 +180,7 @@ class LocalAPI(BaseAPI):
         self, global_state: Reactive[GlobalState], local_state: Reactive[LocalState]
     ):  
         
-        if not GLOBAL_STATE.value.update_db: 
+        if not GLOBAL_STATE.value.update_db or self.is_educator: 
             logger.info('Skipping DB write')
             return False
         
@@ -196,7 +205,7 @@ class LocalAPI(BaseAPI):
     def put_sample_measurements(
         self, global_state: Reactive[GlobalState], local_state: Reactive[LocalState]
     ):
-        if not GLOBAL_STATE.value.update_db: 
+        if not GLOBAL_STATE.value.update_db or self.is_educator: 
             logger.info('Skipping DB write')
             return False
         
@@ -275,6 +284,10 @@ class LocalAPI(BaseAPI):
     def delete_all_measurements(
         self, global_state: Reactive[GlobalState], local_state: Reactive[LocalState]
     ):
+        if not global_state.value.update_db or self.is_educator:
+            logger.info("Skipping deletion of measurements.")
+            return
+        
         url = f"{self.API_URL}/{local_state.value.story_id}/measurements/{global_state.value.student.id}"
         measurements_json = self.request_session.get(url).json()
 
@@ -331,6 +344,9 @@ class LocalAPI(BaseAPI):
         global_state: Reactive[GlobalState],
         local_state: Reactive[LocalState],
     ) -> int:
+        if global_state.value.classroom.class_info is None or 'id' not in global_state.value.classroom.class_info:
+            logger.warning("No class id found in classroom info.")
+            return 0
         url = (
             f"{self.API_URL}/{local_state.value.story_id}/class-measurements/students-completed/"
             f"{global_state.value.student.id}/{global_state.value.classroom.class_info['id']}"
@@ -386,7 +402,7 @@ class LocalAPI(BaseAPI):
         local_state: Reactive[LocalState],
         component_state: Reactive[BaseState],
     ):
-        if not GLOBAL_STATE.value.update_db: 
+        if not GLOBAL_STATE.value.update_db or self.is_educator: 
             logger.info('Skipping DB write')
             return False
         
@@ -417,7 +433,7 @@ class LocalAPI(BaseAPI):
         global_state: Reactive[GlobalState],
         local_state: Reactive[LocalState],
     ):
-        if not GLOBAL_STATE.value.update_db: 
+        if not GLOBAL_STATE.value.update_db or self.is_educator: 
             logger.info('Skipping DB write')
             return False
         

@@ -320,6 +320,8 @@ def _add_link(gjapp, from_dc_name, from_att, to_dc_name, to_att):
         to_dc = gjapp.data_collection[to_dc_name]
     if not basic_link_exists(gjapp.data_collection, from_dc.id[from_att], to_dc.id[to_att]):
         gjapp.add_link(from_dc, from_att, to_dc, to_att)
+    else:
+        print(f"Link already exists between {from_dc.label} and {to_dc.label} for {from_att} and {to_att}")
     
 def subset_by_label(data, label):
         value = next((s for s in data.subsets if s.label == label), None)

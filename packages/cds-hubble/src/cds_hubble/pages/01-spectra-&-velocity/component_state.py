@@ -156,11 +156,11 @@ class ComponentState(BaseComponentState, BaseState):
 
     @property
     def sel_gal4_gate(self) -> bool:
-        return self.total_galaxies == 5
+        return self.total_galaxies >= 5
 
     @property
     def cho_row1_gate(self) -> bool:
-        return self.total_galaxies == 5
+        return self.total_galaxies >= 5
 
     @property
     def mee_spe1_gate(self) -> bool:
