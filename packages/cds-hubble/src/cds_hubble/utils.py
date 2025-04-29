@@ -16,7 +16,7 @@ from solara.routing import Router
 from solara.toestand import Reactive
 from solara.server import settings
 
-from .state import StudentMeasurement
+from cds_hubble.state import GalaxyData, StudentMeasurement
 from glue.core import Data
 from numpy import asarray
 
@@ -128,11 +128,30 @@ def format_measured_angle(angle):
 def velocity_from_wavelengths(lamb_meas, lamb_rest):
     return round((3 * (10**5) * (lamb_meas / lamb_rest - 1)), 0)
 
+
+def observed_wavelength_from_redshift(z: float, rest_wavelength: float) -> float:
+    return rest_wavelength * (1 + z)
+
+
+def rest_wavelength(galaxy: GalaxyData) -> float:
+    return MG_REST_LAMBDA if galaxy.element == "Mg-I" else H_ALPHA_REST_LAMBDA
+
+
+def distance_for_velocity(velocity: float) -> float:
+    return velocity / 70.85 # H0 = 70.85 km/s/Mpc for Age = 13.8 Gyr
+
+
+def angular_size_for_velocity(velocity: float) -> float:
+    return round(DISTANCE_CONSTANT / distance_for_velocity(velocity), 0)
+
+
 def w2v(lambda_meas, lamb_rest):
     return SPEED_OF_LIGHT * (lambda_meas / lamb_rest - 1)
 
+
 def v2w(velocity, lamb_rest):
     return lamb_rest * (velocity / SPEED_OF_LIGHT + 1)
+
 
 def distance_from_angular_size(theta):
     return round(DISTANCE_CONSTANT / theta, 0)
@@ -155,6 +174,7 @@ def data_summary_for_component(data, component_id):
         summary[f"{percent}%"] = (bottom, top)
 
     return summary
+
 
 def measurement_list_to_glue_data(measurements: list[StudentMeasurement] | list[dict], label = ""):
     x = []
@@ -323,9 +343,11 @@ def _add_link(gjapp, from_dc_name, from_att, to_dc_name, to_att):
     else:
         print(f"Link already exists between {from_dc.label} and {to_dc.label} for {from_att} and {to_att}")
     
+
 def subset_by_label(data, label):
         value = next((s for s in data.subsets if s.label == label), None)
         return value
+
 
 def push_to_route(router: Router, location, route: str):
     if route != '/':
