@@ -59,20 +59,22 @@ from ...stage_one_and_three_setup import (
     _update_seed_data_with_examples,
 )
 
-from ...demo_helpers import (set_dummy_wavelength_and_velocity,
-                                   set_dummy_all_measurements,
-                                   set_dummy_wavelength)
+from cds_hubble.measurement_helpers import (
+    fill_add_all_measurements,
+    fill_and_add_wavelengths,
+    fill_and_add_velocities,
+)
 
 logger = setup_logger("STAGE")
 
 GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
 
 
-
 def is_wavelength_poorly_measured(measwave, restwave, z, tolerance = 0.5):
     z_meas =  (measwave - restwave) / restwave
     fractional_difference = (((z_meas - z) / z)** 2)**0.5
     return fractional_difference > tolerance
+
 
 def nbin_func(xmin, xmax):
     if xmin is None or xmax is None:
@@ -83,6 +85,7 @@ def nbin_func(xmin, xmax):
     min_bins = 30
     power = 1.5 # 
     return 30 + int((frac_range ** power) * (max_bins - min_bins))
+
 
 @solara.component
 def Page():
@@ -211,13 +214,13 @@ def Page():
     selection_tool_bg_count = solara.use_reactive(0)
 
     def _fill_galaxies():
-        set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+        fill_add_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
 
     def _fill_lambdas():
-        set_dummy_wavelength(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+        fill_and_add_wavelengths(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
 
     def _fill_stage1_go_stage2():
-        set_dummy_wavelength_and_velocity(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+        fill_and_add_velocities(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
         push_to_route(router, location, f"02-distance-introduction")
 
     def _select_random_galaxies():

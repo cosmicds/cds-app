@@ -37,9 +37,9 @@ from ...viewer_marker_colors import (
     OTHER_STUDENTS_COLOR,
     GENERIC_COLOR
 )
-from ...demo_helpers import set_dummy_all_measurements
 
 from cds_core.logger import setup_logger
+from cds_hubble.measurement_helpers import fill_add_all_measurements
 
 logger = setup_logger("STAGE 5")
 
@@ -334,7 +334,7 @@ def Page():
         if GLOBAL_STATE.value.show_team_interface:
 
             def fill_all_data():
-                set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+                fill_add_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
                 Ref(LOCAL_STATE.fields.measurements_loaded).set(True)
                 force_memo_update.set(not force_memo_update.value)
             solara.Button(

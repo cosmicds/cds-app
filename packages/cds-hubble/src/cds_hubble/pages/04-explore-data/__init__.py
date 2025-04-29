@@ -21,8 +21,8 @@ from .component_state import COMPONENT_STATE, Marker
 from ...remote import LOCAL_API
 from ...utils import AGE_CONSTANT, models_to_glue_data, PLOTLY_MARGINS, get_image_path, push_to_route
 
-from ...demo_helpers import set_dummy_all_measurements
 from cds_core.logger import setup_logger
+from cds_hubble.measurement_helpers import fill_add_all_measurements
 
 logger = setup_logger("STAGE 4")
 
@@ -285,7 +285,7 @@ def Page():
         )
         if GLOBAL_STATE.value.show_team_interface:
             def _fill_all_data():
-                set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+                fill_add_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
             solara.Button(label="Shortcut: Fill in galaxy velocity data & Jump to Stage 2", on_click=_fill_all_data, classes=["demo-button"])
             _fill_all_data()
             best_fit_slope.set(16.9653)
