@@ -10,7 +10,7 @@ from cds_core.state import GlobalState, BaseState, GLOBAL_STATE
 from solara import Reactive
 from solara.toestand import Ref
 from cds_core.logger import setup_logger
-from typing import List
+from typing import List, Optional
 
 from pathlib import Path
 from csv import DictReader
@@ -486,5 +486,12 @@ class LocalAPI(BaseAPI):
             measurements.append(res_json[i])
 
         return measurements
+
+    def ignore_student(
+        self,
+        student_id: Optional[int] = None,
+        ignore: bool = True,
+    ):
+        super().ignore_student_for_story("hubbles_law", student_id, ignore)
 
 LOCAL_API = LocalAPI()
