@@ -16,7 +16,7 @@ from solara.routing import Router
 from solara.toestand import Reactive
 from solara.server import settings
 
-from .state import StudentMeasurement
+from cds_hubble.state import GalaxyData, StudentMeasurement
 from glue.core import Data
 from numpy import asarray
 
@@ -128,11 +128,30 @@ def format_measured_angle(angle):
 def velocity_from_wavelengths(lamb_meas, lamb_rest):
     return round((3 * (10**5) * (lamb_meas / lamb_rest - 1)), 0)
 
+
+def observed_wavelength_from_redshift(z: float, rest_wavelength: float) -> float:
+    return rest_wavelength * (1 + z)
+
+
+def rest_wavelength(galaxy: GalaxyData) -> float:
+    return MG_REST_LAMBDA if galaxy.element == "Mg-I" else H_ALPHA_REST_LAMBDA
+
+
+def distance_for_velocity(velocity: float) -> float:
+    return velocity / 70.85 # H0 = 70.85 km/s/Mpc for Age = 13.8 Gyr
+
+
+def angular_size_for_velocity(velocity: float) -> float:
+    return DISTANCE_CONSTANT / distance_for_velocity(velocity)
+
+
 def w2v(lambda_meas, lamb_rest):
     return SPEED_OF_LIGHT * (lambda_meas / lamb_rest - 1)
 
+
 def v2w(velocity, lamb_rest):
     return lamb_rest * (velocity / SPEED_OF_LIGHT + 1)
+
 
 def distance_from_angular_size(theta):
     return round(DISTANCE_CONSTANT / theta, 0)
