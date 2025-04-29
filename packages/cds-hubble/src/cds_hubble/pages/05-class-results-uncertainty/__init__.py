@@ -53,6 +53,9 @@ def Page():
     student_slider_setup, set_student_slider_setup = solara.use_state(False)
     class_slider_setup, set_class_slider_setup = solara.use_state(False)
 
+    selected_student_id = solara.use_reactive(None)
+    selected_class_id = solara.use_reactive(None)
+
     router = solara.use_router()
     location = solara.use_context(solara.routing._location_context)
 
@@ -612,6 +615,7 @@ def Page():
                 color = student_highlight_color if highlighted else student_default_color
                 student_slider_subset.style.color = color
                 student_slider_subset.style.markersize = 12
+                selected_student_id.set(id)
                 if not student_slider_setup:
                     viewer = viewers["student_slider"]
                     viewer.state.reset_limits()
@@ -631,6 +635,8 @@ def Page():
                     default_color=student_default_color,
                     highlight_color=student_highlight_color
                 )
+                if GLOBAL_STATE.value.show_team_interface:
+                    rv.Chip(children=[rv.Text(children=[f"Student ID {selected_student_id.value}"])])
 
         if COMPONENT_STATE.value.current_step_between(Marker.lea_unc1, Marker.you_age1c):
             with solara.ColumnsResponsive(12, large=[5,7]):
@@ -687,6 +693,7 @@ def Page():
                 class_slider_subset.subset_state = RangeSubsetState(id, id, all_data.id['class_id'])
                 color = class_highlight_color if highlighted else class_default_color
                 class_slider_subset.style.color = color
+                selected_class_id.set(id)
                 if not class_slider_setup:
                     viewer = viewers["class_slider"]
                     viewer.state.reset_limits()
@@ -706,6 +713,8 @@ def Page():
                     default_color=class_default_color,
                     highlight_color=class_highlight_color
                 )
+                if GLOBAL_STATE.value.show_team_interface:
+                    rv.Chip(children=[rv.Text(children=[f"Class ID {selected_class_id.value}"])])
 
                 with rv.Col(cols=10, offset=1):
                     UncertaintySlideshow(
