@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 
 from ..logger_setup import logger
 
+from ..data.load_data import hubble_data, hst_data
+
 @solara.component
 def ClassPlot(dataframe, 
             x_col = "est_dist_value", 
@@ -20,6 +22,8 @@ def ClassPlot(dataframe,
             main_label = None,
             subset_color='#0097A7',
             main_color='#BBBBBB',
+            show_hubble = True,
+            show_hst = True
               ):
     
     subset = None
@@ -94,7 +98,26 @@ def ClassPlot(dataframe,
         selected.set(dataframe.iloc[selected_index][select_on])
         if on_click is not None:
             on_click(points)
-        
+    
+    # show in background
+    if show_hubble:
+        logger.debug('Adding Hubble trace')
+        fig.add_trace(go.Scatter(x= hubble_data[x_col], y= hubble_data[y_col], mode = 'markers',
+                                            hovertemplate = "<b>Hubble</b><br>" + xlabel + '<br>' + ylabel,
+                                            name = 'Hubble',
+                                            marker_symbol = 'circle',   
+                                            marker_size = 7,
+                                            zorder=-1,
+                                            marker_color = '#c676bd'))
+    if show_hst:
+        logger.debug('Adding HST trace')
+        fig.add_trace(go.Scatter(x= hst_data[x_col], y= hst_data[y_col], mode = 'markers',
+                                            hovertemplate = "<b>HSTble</b><br>" + xlabel + '<br>' + ylabel,
+                                            name = 'HST',
+                                            marker_symbol = 'circle',   
+                                            marker_size = 7,
+                                            zorder=-1,
+                                            marker_color = '#80bc8d'))
     
     if subset is not None:
         logger.debug('Adding seen trace')

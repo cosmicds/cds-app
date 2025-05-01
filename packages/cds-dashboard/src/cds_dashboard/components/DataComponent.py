@@ -14,7 +14,7 @@ from ..logger_setup import logger
 from ..class_report import Roster
 from solara.reactive import Reactive
 from typing import Optional, cast
-
+from solara.alias import rv
 
 def get_class_subset(data, sid, class_data_students = None, ungroup = True):
     if isinstance(sid, solara.Reactive):
@@ -81,6 +81,8 @@ def DataSummary(roster: Reactive[Roster] | Roster = None, student_id = None, on_
     logger.debug('Displaying data summary')
     
     roster = solara.use_reactive(roster).value
+    show_hubble = solara.use_reactive(False)
+    show_hst = solara.use_reactive(False)
     
     data = cast(DataFrame, roster.get_class_data(df=True))
     # add names
@@ -122,11 +124,30 @@ def DataSummary(roster: Reactive[Roster] | Roster = None, student_id = None, on_
         
     
     if allow_click:
-        ClassPlot(data, on_click=on_plot_click, label_col='name', select_on = 'student_id', selected = student_id, allow_click=True, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
+        ClassPlot(data, on_click=on_plot_click, label_col='name', select_on = 'student_id', selected = student_id, allow_click=True, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', show_hubble = show_hubble.value, show_hst = show_hst.value)
     else:
-        ClassPlot(data, select_on = 'student_id', label_col='name', selected = student_id, allow_click = False, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
-
-    
+        ClassPlot(data, select_on = 'student_id', label_col='name', selected = student_id, allow_click = False, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', show_hubble = show_hubble.value, show_hst = show_hst.value)
+    with rv.Row(justify='start'):
+        solara.Button(
+            label = f"{'Hide' if show_hubble.value else 'Show'} Edwin Hubble's Data", 
+            color = "secondary", 
+            on_click = lambda: show_hubble.set(not show_hubble.value), 
+            style = {
+                'margin': '5px',
+                'text-transform': 'none', 
+                'height': '1.8rem',
+                }
+            )
+        solara.Button(
+            label = f"{'Hide' if show_hst.value else 'Show'} HST Data", 
+            color = "secondary", 
+            on_click = lambda: show_hst.set(not show_hst.value), 
+            style = {
+                'margin': '5px',
+                'text-transform': 'none', 
+                'height': '1.8rem',
+                }
+            )
 
 from numpy import nan, array
 def get_slope(x, y):
