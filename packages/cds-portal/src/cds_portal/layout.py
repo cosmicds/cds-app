@@ -272,7 +272,7 @@ def Layout(children=[]):
                     with rv.Col(cols=4):
                         rv.Img(
                             src=str(
-                                IMG_PATH / "NASA_Partner_color_300_no_outline.webp"
+                                IMG_PATH / "NASA_Grantee_color_no_outline.png"
                             ),
                             contain=True,
                             height="100",
