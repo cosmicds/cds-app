@@ -79,7 +79,7 @@ from ...stage_one_and_three_setup import (
     _update_seed_data_with_examples,
 )
 
-from ...demo_helpers import set_dummy_all_measurements, set_dummy_wave_vel_ang
+from ...measurement_helpers import fill_add_all_measurements, fill_add_wave_vel_ang
 
 GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
 logger = setup_logger("STAGE3")
@@ -340,12 +340,12 @@ def Page():
     # loaded_component_state.subscribe(_initialize_state)
     
     def _fill_data_points():
-        set_dummy_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+        fill_add_all_measurements(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
         Ref(COMPONENT_STATE.fields.angular_sizes_total).set(5)
         push_to_route(router, location, "04-explore-data")
 
     def _fill_thetas():
-        set_dummy_wave_vel_ang(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
+        fill_add_wave_vel_ang(LOCAL_API, LOCAL_STATE, GLOBAL_STATE)
         Ref(COMPONENT_STATE.fields.angular_sizes_total).set(5)
     
     example_data_setup = solara.use_reactive(False)
