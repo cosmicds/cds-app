@@ -63,7 +63,7 @@ class LocalAPI(BaseAPI):
 
         if data is None:
             logger.error("No extension named 'COADD' in spectrum file.")
-            return
+            return_
 
         spec_data = SpectrumData(
             name=gal_data.name,
@@ -475,6 +475,7 @@ class LocalAPI(BaseAPI):
             return False
 
         return True
+
 
     def get_example_seed_measurement(self, which="both") -> list[dict[str, Any]]:
         # url = f"{self.API_URL}/{local_state.value.story_id}/sample-measurements"

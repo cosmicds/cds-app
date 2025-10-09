@@ -1,5 +1,7 @@
 import enum
+from inspect import isclass
 import os
+from types import UnionType
 from typing import (
     Dict,
     TypeVar,
@@ -11,9 +13,10 @@ from typing import (
     Literal,
     Callable,
     Any,
+    get_origin,
 )
 
-from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic import BaseModel, Field, SerializationInfo, SerializerFunctionWrapHandler, ValidationInfo, computed_field, field_serializer, field_validator
 from solara import Reactive
 from solara.toestand import Ref
 
@@ -51,14 +54,6 @@ def register_story(state_name: str):
         return cls
 
     return decorator
-
-
-class BaseState(BaseModel):
-    def as_dict(self):
-        return self.model_dump()
-
-    def update(self, new):
-        return self.model_copy(update=new)
 
 
 class BaseMarker(enum.Enum):
@@ -110,6 +105,45 @@ class BaseMarker(enum.Enum):
     # Check if the given marker is at the specified marker or earlier.
     def is_at_or_before(cls, marker: "BaseMarker", end: "BaseMarker"):
         return marker.value <= end.value
+
+
+class BaseState(BaseModel):
+
+    @field_serializer("*", mode="wrap")
+    def serialize_enums(
+        self,
+        value: Any,
+        nxt: SerializerFunctionWrapHandler,
+        _info: SerializationInfo
+    ):
+        if isinstance(value, BaseMarker):
+            return value.value
+        return nxt(value)
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def validate_marker(
+        cls,
+        value: Any,
+        info: ValidationInfo,
+    ) -> BaseMarker:
+        # TODO: Can this be simplified?
+        if info.field_name:
+          annotation = cls.model_fields[info.field_name].annotation
+          if annotation:
+              origin = get_origin(annotation)
+              if origin not in (Union, UnionType) and \
+                 isclass(origin) and \
+                 issubclass(origin, BaseMarker):
+                     return annotation(value)
+        return value
+
+
+    def as_dict(self):
+        return self.model_dump()
+
+    def update(self, new):
+        return self.model_copy(update=new)
 
 
 BaseStageStateT = TypeVar("BaseStageStateT", bound="BaseStageState")

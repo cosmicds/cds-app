@@ -98,6 +98,8 @@ def Page(app_state: Reactive[AppState]):
         cast(StageState, story_state.fields.stage_states["spectra_&_velocity"])
     )
 
+    logger.info(stage_state.value)
+
     selection_tool_candidate_galaxy = solara.use_reactive(None)
 
     router = solara.use_router()

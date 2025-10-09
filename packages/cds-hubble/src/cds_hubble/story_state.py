@@ -106,6 +106,7 @@ class ClassSummary(BaseSummary):
 class StoryState(BaseStoryState):
     title: str = "Hubble's Law"
     story_id: str = "hubbles_law"
+    type: str = "hubbles_law"
     measurements: list[StudentMeasurement] = []
     example_measurements: list[StudentMeasurement] = []
     class_measurements: list[StudentMeasurement] = []

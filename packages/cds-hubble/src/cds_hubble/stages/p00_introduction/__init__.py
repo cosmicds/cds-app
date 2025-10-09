@@ -20,6 +20,9 @@ def Page(app_state: Reactive[AppState]):
     story_state = Ref(cast(StoryState, app_state.fields.story_state))
     stage_state = Ref(cast(StageState, story_state.fields.stage_states["introduction"]))
 
+    logger.info(story_state.value)
+    logger.info(stage_state.value)
+
     router = solara.use_router()
     location = solara.use_context(solara.routing._location_context)
 
@@ -27,6 +30,8 @@ def Page(app_state: Reactive[AppState]):
         return ExplorationTool()
 
     exploration_tool = solara.use_memo(_get_exploration_tool, dependencies=[])
+
+    logger.info("Created exploration tool")
 
     def go_to_location(options):
         index = options.get("index", 0)
@@ -41,6 +46,8 @@ def Page(app_state: Reactive[AppState]):
 
     speech = Ref(app_state.fields.speech)
 
+    logger.info("About to create intro slideshow")
+    logger.info(stage_state.value.intro_slideshow_state)
     IntroSlideshowVue(
         step=stage_state.value.intro_slideshow_state.step,
         event_set_step=Ref(stage_state.fields.intro_slideshow_state.step).set,

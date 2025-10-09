@@ -37,7 +37,7 @@ class AppState(BaseAppState):
     student: Student = Student()
     classroom: Classroom = Classroom()
     update_db: bool = Field(update_db_init, exclude=True)
-    show_team_interface: bool = Field(show_team_interface_init, exclude=True)
+    show_team_interface: bool = Field(True, exclude=True)
     allow_advancing: bool = True
     speech: Speech = Speech()
     educator: bool = False
