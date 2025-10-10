@@ -80,7 +80,9 @@ GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
 def Page(app_state: Reactive[AppState]):
     story_state = Ref(cast(StoryState, app_state.fields.story_state))
     stage_state = Ref(
-        cast(StageState, story_state.fields.stage_states["class_results"])
+        cast(
+            StageState, story_state.fields.stage_states["class_results_and_uncertainty"]
+        )
     )
 
     student_slider_setup, set_student_slider_setup = solara.use_state(False)

@@ -59,7 +59,7 @@ def SpectrumViewer(
 
     use_dark_effective = solara.use_trait_observe(solara.lab.theme, "dark_effective")
 
-    async def _load_spectrum():
+    def _load_spectrum():
         if galaxy_data is None:
             return False
 
@@ -67,7 +67,7 @@ def SpectrumViewer(
 
         return Table({"wave": spec_data.wave, "flux": spec_data.flux}).to_pandas()
 
-    spec_data_task = solara.lab.use_task(  # noqa: SH101
+    spec_data_task = solara.lab.use_task(
         _load_spectrum,
         dependencies=[galaxy_data],
     )
@@ -132,7 +132,7 @@ def SpectrumViewer(
                     ]
                 )
         except Exception as e:
-            print(e)
+            logger.critical(f"Failed to reset spectrum bounds: {e}")
 
         on_reset_tool_clicked()
 

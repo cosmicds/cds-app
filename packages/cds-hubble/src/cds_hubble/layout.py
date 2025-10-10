@@ -77,36 +77,26 @@ def Layout(
     # Load stored state from the server
     solara.use_memo(lambda: _load_state(global_state, local_state), dependencies=[])
 
-    # Subscribe to changes to the state and write to server
-    state_write_queue = solara.use_reactive([])
-
-    def _wrap_write_state(new: AppState, old: AppState):
-        diff = extract_changed_subtree(old.as_dict(), new.as_dict())
-        state_write_queue.set(state_write_queue.value + [diff])
-
-    global_state.subscribe_change(_wrap_write_state)
-
     def _consume_write_state():
         while True:
-            # Sleep for 2 seconds
-            time.sleep(2)
+            # Retrieve current state
+            old_state = global_state.value.as_dict()
 
-            if len(state_write_queue.value) == 0:
+            # Sleep for 5 seconds
+            time.sleep(5)
+
+            # Retrieve state after sleep
+            new_state = global_state.value.as_dict()
+
+            # Get state diff to send atomic updates
+            diff = extract_changed_subtree(old_state, new_state)
+
+            # Return if diff dict is empty
+            if not diff:
                 continue
-
-            # full_change = {}
-            #
-            # for atom in state_write_queue.value:
-            #     full_change.update(atom)
-            #
-            # from pprint import pprint
-            #
-            # pprint(full_change)
 
             # Write the state to the server
             _write_state(global_state, local_state)
-            # Clear the queue
-            state_write_queue.set([])
 
     solara.lab.use_task(_consume_write_state, dependencies=[])
 

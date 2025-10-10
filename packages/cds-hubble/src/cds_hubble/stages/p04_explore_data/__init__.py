@@ -75,6 +75,7 @@ def Page(app_state: Reactive[AppState]):
     clear_fit_line = solara.use_reactive(0)
 
     skip_waiting_room, set_skip_waiting_room = solara.use_state(False)
+    class_data_loaded = solara.use_reactive(False)
 
     def glue_setup() -> Tuple[JupyterApplication, Dict[str, CDSScatterView]]:
         gjapp = JupyterApplication(
@@ -143,6 +144,7 @@ def Page(app_state: Reactive[AppState]):
         measurements.set(class_measurements)
 
         _on_class_data_loaded(class_data_points)
+        class_data_loaded.set(True)
         return class_data_points
 
     def _on_class_data_loaded(class_data_points: List[StudentMeasurement]):
@@ -213,6 +215,13 @@ def Page(app_state: Reactive[AppState]):
         push_to_route(router, location, "class-results")
 
     current_step = Ref(stage_state.fields.current_step)
+
+    # Load class data if we're past the waiting room and haven't loaded it yet.
+    if (
+        stage_state.value.current_step >= Marker.wwt_wait
+        and not class_data_loaded.value
+    ):
+        load_class_data()
 
     @solara.lab.computed
     def draw_enabled():
@@ -555,7 +564,10 @@ def Page(app_state: Reactive[AppState]):
                             event_layer_toggled=_layer_toggled,
                         )
                     with rv.Col(class_="no-padding"):
-                        if student_plot_data.value and class_plot_data.value:
+                        if (
+                            len(student_plot_data.value) > 0
+                            and len(class_plot_data.value) > 0
+                        ):
                             # Note the ordering here - we want the student data on top
                             layers = (class_plot_data.value, student_plot_data.value)
                             layers_visible = (False, True)
