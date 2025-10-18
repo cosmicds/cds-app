@@ -459,7 +459,9 @@ class LocalAPI(BaseAPI):
         logger.info("Serializing state into DB.")
 
         state = {
-            "app": global_state.value.model_dump(),
+            "app": global_state.value.model_dump(
+                exclude={"story_state": global_state.value.story_state.excluded_fields}
+            ),
         }
 
         state_json = json.dumps(state, cls=CDSJSONEncoder)

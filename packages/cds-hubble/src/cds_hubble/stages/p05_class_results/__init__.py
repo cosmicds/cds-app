@@ -80,7 +80,9 @@ GUIDELINE_ROOT = Path(__file__).parent / "guidelines"
 def Page(app_state: Reactive[AppState]):
     story_state = Ref(cast(StoryState, app_state.fields.story_state))
     stage_state = Ref(
-        cast(StageState, story_state.fields.stage_states["class_results"])
+        cast(
+            StageState, story_state.fields.stage_states["class_results_and_uncertainty"]
+        )
     )
 
     student_slider_setup, set_student_slider_setup = solara.use_state(False)
@@ -492,7 +494,7 @@ def Page(app_state: Reactive[AppState]):
         current_step.subscribe(update_layer_viewer_visibilities)
         current_step.subscribe(_on_marker_updated)
 
-    solara.use_memo(_state_callback_setup, dependencies=[])
+    solara.use_memo(_state_callback_setup, dependencies=[])  # noqa: SH101
 
     line_fit_tool = viewers["layer"].toolbar.tools["hubble:linefit"]
     add_callback(line_fit_tool, "active", _on_best_fit_line_shown)
@@ -538,7 +540,7 @@ def Page(app_state: Reactive[AppState]):
         class_low_age.set(round(min(all_class_summ_data["age_value"])))
         class_high_age.set(round(max(all_class_summ_data["age_value"])))
 
-    solara.use_memo(_parse_component_state, dependencies=[])
+    solara.use_memo(_parse_component_state, dependencies=[])  # noqa: SH101
 
     # --------------------- Row 1: OUR DATA HUBBLE VIEWER -----------------------
     if stage_state.value.current_step_between(
@@ -750,6 +752,13 @@ def Page(app_state: Reactive[AppState]):
                 with rv.Col():
                     pass
                 with rv.Col():
+                    # We show the free responses from the previous stage, so we need to
+                    #  get the explore_data stage state to access these responses
+                    stage_4_state = Ref(
+                        cast(
+                            StageState, story_state.fields.stage_states["explore_data"]
+                        )
+                    )
                     with rv.Col(cols=10, offset=1):
                         UncertaintySlideshow(
                             event_on_slideshow_finished=lambda _: Ref(
@@ -757,19 +766,19 @@ def Page(app_state: Reactive[AppState]):
                             ).set(True),
                             step=stage_state.value.uncertainty_state.step,
                             max_step_completed=stage_state.value.uncertainty_state.max_step_completed,
-                            age_calc_short1=stage_state.value.free_responses.get(
+                            age_calc_short1=stage_4_state.value.free_responses.get(
                                 "shortcoming-1",
                                 FreeResponse(tag="shortcoming-1"),
                             )
                             .model_dump()
                             .get("response"),
-                            age_calc_short2=stage_state.value.free_responses.get(
+                            age_calc_short2=stage_4_state.value.free_responses.get(
                                 "shortcoming-2",
                                 FreeResponse(tag="shortcoming-2"),
                             )
                             .model_dump()
                             .get("response"),
-                            age_calc_short_other=stage_state.value.free_responses.get(
+                            age_calc_short_other=stage_4_state.value.free_responses.get(
                                 "other-shortcomings",
                                 FreeResponse(tag="other-shortcomings"),
                             )

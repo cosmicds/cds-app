@@ -5,6 +5,7 @@ from deepdiff import DeepDiff
 from solara import Reactive
 from solara.lab import Ref
 
+
 from cds_core.app_state import AppState
 from cds_core.layout import BaseLayout, BaseSetup
 from cds_core.logger import setup_logger
@@ -77,41 +78,30 @@ def Layout(
     # Load stored state from the server
     solara.use_memo(lambda: _load_state(global_state, local_state), dependencies=[])
 
-    # Subscribe to changes to the state and write to server
-    state_write_queue = solara.use_reactive([])
-
-    def _wrap_write_state(new: AppState, old: AppState):
-        diff = extract_changed_subtree(old.as_dict(), new.as_dict())
-        state_write_queue.set(state_write_queue.value + [diff])
-
-    global_state.subscribe_change(_wrap_write_state)
-
     def _consume_write_state():
         while True:
+            # Retrieve current state
+            old_state = global_state.value.as_dict()
+
             # Sleep for 2 seconds
             time.sleep(2)
 
-            if len(state_write_queue.value) == 0:
-                continue
+            # Retrieve state after sleep
+            new_state = global_state.value.as_dict()
 
-            # full_change = {}
-            #
-            # for atom in state_write_queue.value:
-            #     full_change.update(atom)
-            #
-            # from pprint import pprint
-            #
-            # pprint(full_change)
+            # Get state diff to send atomic updates
+            diff = extract_changed_subtree(old_state, new_state)
+
+            # Return if diff dict is empty
+            if not diff:
+                continue
 
             # Write the state to the server
             _write_state(global_state, local_state)
-            # Clear the queue
-            state_write_queue.set([])
 
     solara.lab.use_task(_consume_write_state, dependencies=[])
 
-    loaded_states = solara.use_reactive(False)
-    route_restored = Ref(local_state.fields.route_restored)
+    route_restored = solara.use_reactive(False)
 
     router = solara.use_router()
     location = solara.use_context(solara.routing._location_context)
@@ -133,7 +123,11 @@ def Layout(
 
     solara.use_effect(_store_user_location, dependencies=[route_current])
 
+    # TODO: This is a temporary fix to restore the user's location after loading
+    #  their state from the database. For some reason, the router resets several
+    #  times during this page's rendering, so we just time it out for now.
     def _restore_user_location():
+        time.sleep(0.5)
         if not route_restored.value:
             if (
                 local_state.value.last_route is not None
@@ -143,10 +137,10 @@ def Layout(
                     f"Restoring path location to `{local_state.value.last_route}`"
                 )
                 push_to_route(router, location, local_state.value.last_route)
-            else:
-                route_restored.set(True)
 
-    solara.use_memo(_restore_user_location)
+            route_restored.set(True)
+
+    solara.lab.use_task(_restore_user_location, dependencies=[])
 
     # The rendering takes a moment while the route resolves, this can appear as
     #  a flicker before the true page loads. Here, we hide the page until the
