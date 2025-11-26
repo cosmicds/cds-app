@@ -88,6 +88,9 @@ def Page(app_state: Reactive[AppState]):
     student_slider_setup, set_student_slider_setup = solara.use_state(False)
     class_slider_setup, set_class_slider_setup = solara.use_state(False)
 
+    selected_student_id = solara.use_reactive(None)
+    selected_class_id = solara.use_reactive(None)
+
     router = solara.use_router()
     location = solara.use_context(solara.routing._location_context)
 
@@ -727,6 +730,7 @@ def Page(app_state: Reactive[AppState]):
                 )
                 student_slider_subset.style.color = color
                 student_slider_subset.style.markersize = 12
+                selected_student_id.set(id)
                 if not student_slider_setup:
                     viewer = viewers["student_slider"]
                     viewer.state.reset_limits()
@@ -746,6 +750,11 @@ def Page(app_state: Reactive[AppState]):
                     default_color=student_default_color,
                     highlight_color=student_highlight_color,
                 )
+                if app_state.value.show_team_interface:
+                    rv.Chip(
+                        children=[rv.Text(children=[f"Student ID {selected_student_id.value}"])],
+                        style_="margin-top: 25px",
+                    )
 
         if stage_state.value.current_step_between(Marker.lea_unc1, Marker.you_age1c):
             with solara.ColumnsResponsive(12, large=[5, 7]):
@@ -844,6 +853,7 @@ def Page(app_state: Reactive[AppState]):
                 )
                 color = class_highlight_color if highlighted else class_default_color
                 class_slider_subset.style.color = color
+                selected_class_id.set(id)
                 if not class_slider_setup:
                     viewer = viewers["class_slider"]
                     viewer.state.reset_limits()
@@ -863,6 +873,11 @@ def Page(app_state: Reactive[AppState]):
                     default_color=class_default_color,
                     highlight_color=class_highlight_color,
                 )
+                if app_state.value.show_team_interface:
+                    rv.Chip(
+                        children=[rv.Text(children=[f"Class ID {selected_class_id.value}"])],
+                        style_="margin-top: 25px",
+                    )
 
                 with rv.Col(cols=10, offset=1):
                     UncertaintySlideshow(
