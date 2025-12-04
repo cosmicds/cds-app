@@ -588,8 +588,9 @@ def Page(app_state: Reactive[AppState]):
                             def line_fit_cb(args: Dict):
                                 # student line is the 2nd of the 2 layers, so index=1
                                 best_fit_slope.set(args["slopes"][1])
-                                range = args["range"]
-                                best_fit_gal_dist.set(round(range / 2))
+                                student_xs = [m.est_dist_value for m in story_state.value.measurements]
+                                best_fit_dist = 0.5 * (min(student_xs) + max(student_xs))
+                                best_fit_gal_dist.set(round(best_fit_dist))
                                 best_fit_gal_vel.set(
                                     round(
                                         best_fit_slope.value * best_fit_gal_dist.value
