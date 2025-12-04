@@ -11,7 +11,7 @@ from glue.core.message import NumericalDataChangedMessage
 from glue.core.subset import RangeSubsetState
 from glue_jupyter import JupyterApplication
 from glue_jupyter.link import link
-from glue_plotly.viewers import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from solara import Reactive
 from solara.toestand import Ref
 

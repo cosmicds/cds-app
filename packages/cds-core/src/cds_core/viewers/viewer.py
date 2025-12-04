@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from echo import add_callback
 from glue.config import viewer_tool
-from glue_plotly.viewers import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 
 from ..widgets.toolbar import Toolbar
 
@@ -34,10 +34,9 @@ def cds_viewer(viewer_class, name, viewer_tools=[], label=None, state_cls=None):
                 self._create_plotly_subtitle(self.state.subtitle)
 
         def _create_plotly_subtitle(self, text=None):
-            self.figure.add_annotation(text=text,
-                                       xref="paper", yref="paper",
-                                       x=0.5, y=1.2,
-                                       showarrow=False)
+            self.figure.add_annotation(
+                text=text, xref="paper", yref="paper", x=0.5, y=1.2, showarrow=False
+            )
 
         def _update_plotly_subtitle(self, text=None):
             subtitle = next(self.figure.select_annotations(), None)
@@ -48,10 +47,10 @@ def cds_viewer(viewer_class, name, viewer_tools=[], label=None, state_cls=None):
 
             # If viewer_class has its own custom initialize_toolbar, defer to that
             # This will ONLY be called if it's defined in viewer_class
-            if 'initialize_toolbar' in viewer_class.__dict__:
+            if "initialize_toolbar" in viewer_class.__dict__:
                 viewer_class.initialize_toolbar(self)
                 return
-            
+
             self.toolbar = Toolbar(self)
 
             for tool_id in self.tools:
@@ -79,7 +78,7 @@ def cds_viewer(viewer_class, name, viewer_tools=[], label=None, state_cls=None):
         def _update_xtick_values(self, values):
             self.axis_x.tickmode = "array"
             self.axis_x.tickvals = values
-        
+
         def _update_ytick_values(self, values):
             self.axis_x.tickmode = "array"
             self.axis_y.tickvals = values

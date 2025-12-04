@@ -1,5 +1,5 @@
 from ..utils import make_figure_autoresize, DEFAULT_VIEWER_HEIGHT
-from glue_plotly.viewers.common import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 import solara
 import reacton.ipyvuetify as rv
 
@@ -15,14 +15,29 @@ def ToolBar(viewer):
 
     solara.Row(
         children=[
-            solara.Text(title, style={"padding-left": "1ch", "text-transform": "uppercase", "height": "48px", "align-content": "center", "font-size": "1.3rem"}),
+            solara.Text(
+                title,
+                style={
+                    "padding-left": "1ch",
+                    "text-transform": "uppercase",
+                    "height": "48px",
+                    "align-content": "center",
+                    "font-size": "1.3rem",
+                },
+            ),
             solara.v.Spacer(),
             viewer.toolbar,
         ],
         margin=0,
-        style= {"background-color": "var(--primary)", "border-bottom-left-radius": "0px", "border-bottom-right-radius": "0px", "color": "white"},
+        style={
+            "background-color": "var(--primary)",
+            "border-bottom-left-radius": "0px",
+            "border-bottom-right-radius": "0px",
+            "color": "white",
+        },
         classes=["toolbar"],
     )
+
 
 @solara.component
 def ViewerLayout(viewer, viewer_height=DEFAULT_VIEWER_HEIGHT):

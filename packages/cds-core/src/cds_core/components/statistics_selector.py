@@ -9,27 +9,43 @@ from uuid import uuid4
 
 from glue.core import Data
 from glue.viewers.common.viewer import Viewer
-from glue_plotly.viewers.common import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from plotly.graph_objects import Scatter
 from numbers import Number
 from typing import Callable, Iterable, List, Optional
 
 from ..utils import line_mark, mode, CDS_IMAGE_BASE_URL
 
-image_location=f"{CDS_IMAGE_BASE_URL}"
+image_location = f"{CDS_IMAGE_BASE_URL}"
+
 
 # glue doesn't implement a mode statistic, so we roll our own
 # Since there can be multiple modes, mode can be a list
 # and so we return a list for every statistic to make things simpler
-def find_statistic(stat: str, viewer: Viewer, data: Data, bins: Iterable[int | float] | None):
+def find_statistic(
+    stat: str, viewer: Viewer, data: Data, bins: Iterable[int | float] | None
+):
     if stat == "mode":
-        return mode(data, viewer.state.x_att, bins=bins, range=[viewer.state.hist_x_min, viewer.state.hist_x_max])
+        return mode(
+            data,
+            viewer.state.x_att,
+            bins=bins,
+            range=[viewer.state.hist_x_min, viewer.state.hist_x_max],
+        )
     else:
         return [data.compute_statistic(stat, viewer.state.x_att)]
 
 
 # TODO: How can we make this more general to put into the utilities?
-def labeled_vertical_line(x: float, y_min: float, y_max: float, color: str, label: str | None, unit: Optional[str] = None, label_position: Optional[float] = None):
+def labeled_vertical_line(
+    x: float,
+    y_min: float,
+    y_max: float,
+    color: str,
+    label: str | None,
+    unit: Optional[str] = None,
+    label_position: Optional[float] = None,
+):
     label_position = label_position or 0.85
     text = f"{label} {unit}" if unit else label
     return Scatter(
@@ -38,19 +54,21 @@ def labeled_vertical_line(x: float, y_min: float, y_max: float, color: str, labe
         mode="text+lines",
         line=dict(color=color),
         name=label,
-        text=['', f'  {text}', ''],
+        text=["", f"  {text}", ""],
         textposition="top right",
     )
 
 
 @solara.component
-def StatisticsSelector(viewers: List[PlotlyBaseView],
-                       glue_data: List[Data],
-                       units: List[str],
-                       bins: None | List[None | Iterable[Number]]=None,
-                       statistics: List[str]=["mean", "median", "mode"],
-                       transform: Callable[[Number], Number] | None=None,
-                       **kwargs):
+def StatisticsSelector(
+    viewers: List[PlotlyBaseView],
+    glue_data: List[Data],
+    units: List[str],
+    bins: None | List[None | Iterable[Number]] = None,
+    statistics: List[str] = ["mean", "median", "mode"],
+    transform: Callable[[Number], Number] | None = None,
+    **kwargs,
+):
 
     selected = solara.use_reactive(None)
     viewer_labels, set_viewer_labels = solara.use_state([])
@@ -74,13 +92,17 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
         "mode": "A histogram with a range of 9 through 18, with counts from 0 through 8. The mode has the highest count and is highlighted in red.",
     }
 
-    last_updated = selected.value 
+    last_updated = selected.value
 
     def _line_ids_for_viewer(viewer: PlotlyBaseView):
         line_ids = []
         traces = list(chain(l.traces() for l in viewer.layers))
         for trace in viewer.figure.data:
-            if trace not in traces and isinstance(trace, Scatter) and getattr(trace, "meta", None):
+            if (
+                trace not in traces
+                and isinstance(trace, Scatter)
+                and getattr(trace, "meta", None)
+            ):
                 line_ids.append(trace.meta)
 
         return line_ids
@@ -88,14 +110,18 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
     line_ids = [_line_ids_for_viewer(viewer) for viewer in viewers]
 
     def _remove_lines():
-        for (viewer, viewer_line_ids) in zip(viewers, line_ids):
-            lines = list(viewer.figure.select_traces(lambda t: t.meta in viewer_line_ids))
+        for viewer, viewer_line_ids in zip(viewers, line_ids):
+            lines = list(
+                viewer.figure.select_traces(lambda t: t.meta in viewer_line_ids)
+            )
             viewer.figure.data = [t for t in viewer.figure.data if t not in lines]
 
     def _clear_viewer_label(index):
         viewer = viewers[index]
         try:
-            viewer.state.subtitle = viewer.state.subtitle.replace(viewer_labels[index], "")
+            viewer.state.subtitle = viewer.state.subtitle.replace(
+                viewer_labels[index], ""
+            )
         except IndexError:
             pass
 
@@ -115,7 +141,9 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
 
         line_ids.clear()
         labels = []
-        for index, (viewer, d, bin, unit) in enumerate(zip(viewers, glue_data, bins, units)):
+        for index, (viewer, d, bin, unit) in enumerate(
+            zip(viewers, glue_data, bins, units)
+        ):
             _clear_viewer_label(index)
             viewer_lines = []
             viewer_line_ids = []
@@ -128,7 +156,9 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
                 if multiple_values:
                     # NB: If we at some point have a non-trivial (i.e. not just "add an s")
                     # plural, we will need to update this - maybe using e.g. the inflect package
-                    viewer_label = f"{capitalized}s: {', '.join(str(v) for v in values)}"
+                    viewer_label = (
+                        f"{capitalized}s: {', '.join(str(v) for v in values)}"
+                    )
                     if unit:
                         viewer_label += f" {unit}"
                     if viewer.state.subtitle:
@@ -143,8 +173,14 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
                             label += f" {unit}"
                     else:
                         label = ""
-                    line = labeled_vertical_line(value, viewer.state.y_min, viewer.state.y_max,
-                                                 color, label=label, unit=None)
+                    line = labeled_vertical_line(
+                        value,
+                        viewer.state.y_min,
+                        viewer.state.y_max,
+                        color,
+                        label=label,
+                        unit=None,
+                    )
                     line_id = str(uuid4())
                     line["meta"] = line_id
                     viewer_lines.append(line)
@@ -179,10 +215,16 @@ def StatisticsSelector(viewers: List[PlotlyBaseView],
         with rv.Container():
             for stat in statistics:
                 model = _model_factory(stat)
-                with solara.Row(style={"align-items": "center"}, classes=["switch-panel"]):
-                    solara.Switch(value=model,
-                                  label=stat.capitalize(),
-                                  on_value=lambda value, _stat=stat: _update_selected(_stat, value))
+                with solara.Row(
+                    style={"align-items": "center"}, classes=["switch-panel"]
+                ):
+                    solara.Switch(
+                        value=model,
+                        label=stat.capitalize(),
+                        on_value=lambda value, _stat=stat: _update_selected(
+                            _stat, value
+                        ),
+                    )
                     InfoDialog(
                         dialog=False,
                         title=stat,

@@ -1,7 +1,7 @@
 # This file is for viewers that don't need anything beyond
 # the standard CDS updating (the new toolbar, etc.)
-from glue_plotly.viewers.histogram import PlotlyHistogramView
-from glue_plotly.viewers.scatter import PlotlyScatterView
+from glue_plotly.viewers.histogram.viewer import PlotlyHistogramView
+from glue_plotly.viewers.scatter.viewer import PlotlyScatterView
 
 from numpy import spacing
 
@@ -13,31 +13,29 @@ from .dotplot import PlotlyDotPlotView
 CDSScatterView = cds_viewer(
     PlotlyScatterView,
     state_cls=CDSScatterViewerState,
-    name='CDSScatterView',
+    name="CDSScatterView",
     viewer_tools=[
-        'plotly:home',
-        'plotly:zoom',
+        "plotly:home",
+        "plotly:zoom",
     ],
-    label='2D scatter'
+    label="2D scatter",
 )
 
 CDSHistogramView = cds_viewer(
     PlotlyHistogramView,
     state_cls=CDSHistogramViewerState,
-    name='CDSHistogramView',
+    name="CDSHistogramView",
     viewer_tools=[
-        'plotly:home',
-        'plotly:hzoom',
+        "plotly:home",
+        "plotly:hzoom",
     ],
-    label='Histogram'
+    label="Histogram",
 )
 
 CDSDotPlotView = cds_viewer(
     PlotlyDotPlotView,
     state_cls=CDSHistogramViewerState,
-    name='CDSDotPlotView',
-    viewer_tools=[
-        'plotly:home'
-    ],
-    label="Dot Plot"
+    name="CDSDotPlotView",
+    viewer_tools=["plotly:home"],
+    label="Dot Plot",
 )

@@ -9,7 +9,7 @@ from ...viewers.hubble_dotplot import HubbleDotPlotView, HubbleDotPlotViewer
 from cds_core.viewers.dotplot.state import DotPlotViewerState
 
 from glue.viewers.common.viewer import Viewer
-from glue_plotly.viewers.common import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from cds_core.utils import vertical_line_mark, extend_tool
 from ...utils import PLOTLY_MARGINS
 from ...helpers.viewer_marker_colors import LIGHT_GENERIC_COLOR

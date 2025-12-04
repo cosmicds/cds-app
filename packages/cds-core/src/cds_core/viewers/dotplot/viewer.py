@@ -1,5 +1,5 @@
 from glue.core import Data
-from glue_plotly.viewers.histogram import PlotlyHistogramView
+from glue_plotly.viewers.histogram.viewer import PlotlyHistogramView
 from glue_plotly.viewers.histogram.dotplot_layer_artist import PlotlyDotplotLayerArtist
 
 from ...viewers.dotplot.state import DotPlotViewerState
@@ -20,8 +20,12 @@ class PlotlyDotPlotView(PlotlyHistogramView):
 
     _scatter_layers = set()
 
-    def add_data(self, data: Data, layer_type: Literal["dotplot"] | Literal["scatter"] = "dotplot"):
-         
+    def add_data(
+        self,
+        data: Data,
+        layer_type: Literal["dotplot"] | Literal["scatter"] = "dotplot",
+    ):
+
         if layer_type == "scatter":
             self._scatter_layers.add(data.uuid)
 
@@ -34,11 +38,15 @@ class PlotlyDotPlotView(PlotlyHistogramView):
 
     def get_data_layer_artist(self, layer=None, layer_state=None):
         if layer is not None and layer.uuid in self._scatter_layers:
-            return DotplotScatterLayerArtist(self, self.state, layer_state=layer_state, layer=layer)
+            return DotplotScatterLayerArtist(
+                self, self.state, layer_state=layer_state, layer=layer
+            )
         return super().get_data_layer_artist(layer, layer_state)
 
     # For now, subsets have the same layer type as their parent
     def get_subset_layer_artist(self, layer=None, layer_state=None):
         if layer is not None and layer.data.uuid in self._scatter_layers:
-            return DotplotScatterLayerArtist(self, self.state, layer_state=layer_state, layer=layer)
+            return DotplotScatterLayerArtist(
+                self, self.state, layer_state=layer_state, layer=layer
+            )
         return super().get_subset_layer_artist(layer, layer_state)

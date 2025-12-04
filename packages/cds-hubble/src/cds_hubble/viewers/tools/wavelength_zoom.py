@@ -1,6 +1,6 @@
 from echo import CallbackProperty
 from glue.config import viewer_tool
-from glue_plotly.viewers import PlotlyHZoomMode
+from glue_plotly.viewers.common.tools import PlotlyHZoomMode
 
 from cds_core.config import register_tool
 

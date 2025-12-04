@@ -7,7 +7,7 @@ from math import log10
 from types import UnionType
 from glue.core import Component, ComponentID, Data, DataCollection
 from glue.core.roi import CategoricalComponent
-from glue_plotly.viewers import PlotlyBaseView
+from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from requests import adapters
