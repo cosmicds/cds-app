@@ -16,7 +16,7 @@ from solara.routing import Router
 from solara.toestand import Reactive
 from solara.server import settings
 
-from .story_state import StudentMeasurement
+from .story_state import GalaxyData, StudentMeasurement
 from glue.core import Data
 from numpy import asarray
 
@@ -417,3 +417,19 @@ def extract_changed_subtree(old_dict, new_dict):
             apply_changes(result, changes)
 
     return result
+
+
+def observed_wavelength_from_redshift(z: float, rest_wavelength: float) -> float:
+    return rest_wavelength * (1 + z)
+
+
+def rest_wavelength(galaxy: GalaxyData) -> float:
+    return MG_REST_LAMBDA if galaxy.element == "Mg-I" else H_ALPHA_REST_LAMBDA
+
+
+def distance_for_velocity(velocity: float) -> float:
+    return velocity / 70.85 # H0 = 70.85 km/s/Mpc for Age = 13.8 Gyr
+
+
+def angular_size_for_velocity(velocity: float) -> float:
+    return round(DISTANCE_CONSTANT / distance_for_velocity(velocity), 0)

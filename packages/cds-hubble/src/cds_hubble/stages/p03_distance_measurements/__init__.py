@@ -29,8 +29,8 @@ from ...components import (
     DotplotViewer,
 )
 from ...helpers.data_management import *
-from ...helpers.demo_helpers import set_dummy_all_measurements, set_dummy_wave_vel_ang
 from ...helpers.example_measurement_helpers import assert_example_measurements_in_glue
+from ...helpers.measurement_helpers import fill_add_all_measurements, fill_add_wave_vel_ang
 from ...helpers.stage_one_and_three_setup import (
     initialize_second_example_measurement,
     _add_or_update_example_measurements_to_glue,
@@ -311,12 +311,12 @@ def Page(app_state: Reactive[AppState]):
     )
 
     def _fill_data_points():
-        set_dummy_all_measurements(LOCAL_API, story_state, app_state)
+        fill_add_all_measurements(LOCAL_API, story_state, app_state)
         Ref(stage_state.fields.angular_sizes_total).set(5)
         push_to_route(router, location, "explore-data")
 
     def _fill_thetas():
-        set_dummy_wave_vel_ang(LOCAL_API, story_state, app_state)
+        fill_add_wave_vel_ang(LOCAL_API, story_state, app_state)
         Ref(stage_state.fields.angular_sizes_total).set(5)
 
     example_data_setup = solara.use_reactive(False)

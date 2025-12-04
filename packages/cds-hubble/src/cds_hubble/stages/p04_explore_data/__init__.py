@@ -31,7 +31,7 @@ from ...components import (
     PlotlyLayerToggle,
     Stage4WaitingScreen,
 )
-from ...helpers.demo_helpers import set_dummy_all_measurements
+from ...helpers.measurement_helpers import fill_add_all_measurements
 from ...helpers.viewer_marker_colors import MY_DATA_COLOR, MY_CLASS_COLOR, GENERIC_COLOR
 from ...remote import LOCAL_API
 from ...story_state import (
@@ -305,7 +305,7 @@ def Page(app_state: Reactive[AppState]):
         if app_state.value.show_team_interface:
 
             def _fill_all_data():
-                set_dummy_all_measurements(LOCAL_API, story_state, app_state)
+                fill_add_all_measurements(LOCAL_API, story_state, app_state)
 
             solara.Button(
                 label="Shortcut: Fill in galaxy velocity data & Jump to Stage 2",
