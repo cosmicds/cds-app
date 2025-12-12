@@ -36,12 +36,12 @@ from ...helpers.data_management import (
     DB_VELOCITY_FIELD,
     EXAMPLE_GALAXY_MEASUREMENTS,
 )
-from ...helpers.demo_helpers import (
-    set_dummy_wavelength_and_velocity,
-    set_dummy_all_measurements,
-    set_dummy_wavelength,
-)
 from ...helpers.example_measurement_helpers import assert_example_measurements_in_glue
+from ...helpers.measurement_helpers import (
+    fill_and_add_velocities,
+    fill_add_all_measurements,
+    fill_and_add_wavelengths,
+)
 from ...helpers.stage_one_and_three_setup import (
     initialize_second_example_measurement,
     _add_or_update_example_measurements_to_glue,
@@ -189,13 +189,13 @@ def Page(app_state: Reactive[AppState]):
     selection_tool_bg_count = solara.use_reactive(0)
 
     def _fill_galaxies():
-        set_dummy_all_measurements(LOCAL_API, story_state, app_state)
+        fill_add_all_measurements(LOCAL_API, story_state, app_state)
 
     def _fill_lambdas():
-        set_dummy_wavelength(LOCAL_API, story_state, app_state)
+        fill_and_add_wavelengths(LOCAL_API, story_state, app_state)
 
     def _fill_stage1_go_stage2():
-        set_dummy_wavelength_and_velocity(LOCAL_API, story_state, app_state)
+        fill_and_add_velocities(LOCAL_API, story_state, app_state)
         push_to_route(router, location, f"distance-introduction")
 
     def _select_random_galaxies():

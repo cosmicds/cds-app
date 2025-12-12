@@ -4,7 +4,7 @@ from csv import DictReader
 from functools import cache
 from io import BytesIO
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from astropy.io import fits
 from solara import Reactive
@@ -504,6 +504,13 @@ class LocalAPI(BaseAPI):
             measurements.append(res_json[i])
 
         return measurements
+
+    def ignore_student(
+        self,
+        student_id: Optional[int] = None,
+        ignore: bool = True,
+    ):
+        super().ignore_student_for_story("hubbles_law", student_id, ignore)
 
 
 LOCAL_API = LocalAPI()

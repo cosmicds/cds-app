@@ -39,7 +39,7 @@ from cds_core.utils import (
 from cds_core.viewers import CDSHistogramView
 from .stage_state import Marker, StageState
 from ...components import UncertaintySlideshow, IdSlider
-from ...helpers.demo_helpers import set_dummy_all_measurements
+from ...helpers.measurement_helpers import fill_add_all_measurements
 from ...helpers.viewer_marker_colors import (
     MY_DATA_COLOR,
     MY_DATA_COLOR_NAME,
@@ -427,7 +427,7 @@ def Page(app_state: Reactive[AppState]):
         if app_state.value.show_team_interface:
 
             def fill_all_data():
-                set_dummy_all_measurements(LOCAL_API, story_state, app_state)
+                fill_add_all_measurements(LOCAL_API, story_state, app_state)
                 Ref(story_state.fields.measurements_loaded).set(True)
                 force_memo_update.set(not force_memo_update.value)
 
