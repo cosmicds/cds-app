@@ -526,6 +526,7 @@ def Page(app_state: Reactive[AppState]):
                 )
 
     def _parse_component_state():
+        print("PARSE STATE")
         student_low_age = Ref(stage_state.fields.student_low_age)
         student_high_age = Ref(stage_state.fields.student_high_age)
 
@@ -720,7 +721,8 @@ def Page(app_state: Reactive[AppState]):
                 )
                 student_slider_subset.style.color = color
                 student_slider_subset.style.markersize = 12
-                selected_student_id.set(id)
+                if app_state.value.show_team_interface:
+                    selected_student_id.set(id)
                 if not student_slider_setup:
                     viewer = viewers["student_slider"]
                     viewer.state.reset_limits()
@@ -827,7 +829,8 @@ def Page(app_state: Reactive[AppState]):
                 )
                 color = class_highlight_color if highlighted else class_default_color
                 class_slider_subset.style.color = color
-                selected_class_id.set(id)
+                if app_state.value.show_team_interface:
+                    selected_class_id.set(id)
                 if not class_slider_setup:
                     viewer = viewers["class_slider"]
                     viewer.state.reset_limits()
