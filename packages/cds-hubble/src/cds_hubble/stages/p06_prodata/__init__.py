@@ -45,7 +45,7 @@ from ...utils import (
     push_to_route,
     PLOTLY_MARGINS,
 )
-from ...viewers import HubbleFitView
+from ...viewers import HubbleScatterView
 
 logger = setup_logger("STAGE")
 
@@ -76,7 +76,7 @@ def Page(app_state: Reactive[AppState]):
         # returns the slope, m,  of y(x) = m*x
         return sum(x * y) / sum(x * x)
 
-    def _glue_setup() -> Tuple[JupyterApplication, HubbleFitView]:
+    def _glue_setup() -> Tuple[JupyterApplication, HubbleScatterView]:
         # NOTE: use_memo has to be part of the main page render. Including it
         #  in a conditional will result in an error.
         gjapp = JupyterApplication(
@@ -137,11 +137,11 @@ def Page(app_state: Reactive[AppState]):
             "velocity_value",
         )
 
-        viewer = cast(HubbleFitView, gjapp.new_data_viewer(HubbleFitView, show=False))
+        viewer = cast(HubbleScatterView, gjapp.new_data_viewer(HubbleScatterView, show=False))
         viewer.state.title = "Professional Data"
         viewer.figure.update_layout(margin=PLOTLY_MARGINS)
-        viewer.figure.update_xaxes(showline=True, mirror=False, title="Distance (Mpc)")
-        viewer.figure.update_yaxes(showline=True, mirror=False, title="Velocity (km/s)")
+        viewer.figure.update_xaxes(showline=True, mirror=True, title="Distance (Mpc)")
+        viewer.figure.update_yaxes(showline=True, mirror=True, title="Velocity (km/s)")
         viewer.ignore(lambda data: data.label == "student_slider_subset")
 
         old_reset = viewer.state.reset_limits

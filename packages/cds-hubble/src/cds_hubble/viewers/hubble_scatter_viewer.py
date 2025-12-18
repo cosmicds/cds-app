@@ -15,6 +15,10 @@ class HubbleScatterViewerState(CDSScatterViewerState):
             super().reset_limits(visible_only=visible_only)
             self.x_min = min(self.x_min, 0) if self.x_min is not None else 0
             self.y_min = min(self.y_min, 0) if self.y_min is not None else 0
+            if self.x_max is not None:
+                self.x_max = 1.1 * self.x_max
+            if self.y_max is not None:
+                self.y_max = 1.1 * self.y_max
 
 
 HubbleScatterView = cds_viewer(
