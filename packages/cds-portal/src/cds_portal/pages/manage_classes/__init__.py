@@ -27,6 +27,7 @@ def CreateClassDialog(on_create_clicked: callable = None):
     stories, set_stories = solara.use_state("")
     expected_size, set_expected_size = solara.use_state(20)
     asynchronous, set_asynchronous = solara.use_state(False)
+    pad, set_pad = solara.use_state(True)
     expected_size_error = solara.use_reactive(False)
 
     with rv.Dialog(
@@ -89,13 +90,23 @@ def CreateClassDialog(on_create_clicked: callable = None):
                     on_value=set_asynchronous,
                 )
 
+                solara.Text("""
+                    Would you like to pad your class's data with data from previous students?
+                    This will allow your students to dive directly into examining data in Stages 4 and 5 without waiting,
+                    but means that they will see data from students other than just their classmates
+                """)
+                solara.Checkbox(
+                    label="Pad class data",
+                    value=pad,
+                    on_value=set_pad,
+                )
+
             rv.Divider()
 
             with rv.CardActions():
 
                 @solara.lab.computed
                 def create_button_disabled():
-                    print(expected_size_error)
                     return expected_size_error.value or (not (text and stories))
 
                 def _add_button_clicked(*args):
@@ -106,6 +117,7 @@ def CreateClassDialog(on_create_clicked: callable = None):
                             "expected_size": expected_size,
                             "asynchronous": asynchronous,
                             "story_name": format_story_name(stories),
+                            "pad": pad,
                         }
                     )
                     set_active(False)
