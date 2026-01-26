@@ -24,11 +24,15 @@ def format_story_name(name: str):
 def CreateClassDialog(on_create_clicked: callable = None):
     active, set_active = solara.use_state(False)  #
     text, set_text = solara.use_state("")
-    stories, set_stories = solara.use_state("")
+    stories = solara.use_reactive("")
     expected_size, set_expected_size = solara.use_state(20)
     asynchronous, set_asynchronous = solara.use_state(False)
     pad, set_pad = solara.use_state(True)
     expected_size_error = solara.use_reactive(False)
+
+    @solara.lab.computed
+    def show_pad_option():
+        return stories.value == "Hubble's Law"
 
     with rv.Dialog(
         v_model=active,
@@ -63,9 +67,9 @@ def CreateClassDialog(on_create_clicked: callable = None):
                 )
 
                 rv.Select(
-                    v_model=stories,
+                    v_model=stories.value,
                     outlined=True,
-                    on_v_model=set_stories,
+                    on_v_model=stories.set,
                     class_="pt-2",
                     hide_details="auto",
                     label="Data Story",
@@ -90,16 +94,17 @@ def CreateClassDialog(on_create_clicked: callable = None):
                     on_value=set_asynchronous,
                 )
 
-                solara.Text("""
-                    Would you like to pad your class's data with data from previous students?
-                    This will allow your students to dive directly into examining data in Stages 4 and 5 without waiting,
-                    but means that they will see data from students other than just their classmates
-                """)
-                solara.Checkbox(
-                    label="Pad class data",
-                    value=pad,
-                    on_value=set_pad,
-                )
+                if show_pad_option.value:
+                    solara.Text("""
+                        Would you like to pad your class's data with data from previous students?
+                        This will allow your students to dive directly into examining data in Stages 4 and 5 without waiting,
+                        but means that they will see data from students other than just their classmates
+                    """)
+                    solara.Checkbox(
+                        label="Pad class data",
+                        value=pad,
+                        on_value=set_pad,
+                    )
 
             rv.Divider()
 
@@ -107,16 +112,16 @@ def CreateClassDialog(on_create_clicked: callable = None):
 
                 @solara.lab.computed
                 def create_button_disabled():
-                    return expected_size_error.value or (not (text and stories))
+                    return expected_size_error.value or (not (text and stories.value))
 
                 def _add_button_clicked(*args):
                     on_create_clicked(
                         {
                             "name": f"{text}",
-                            "stories": f"{', '.join(stories)}",
+                            "stories": f"{', '.join(stories.value)}",
                             "expected_size": expected_size,
                             "asynchronous": asynchronous,
-                            "story_name": format_story_name(stories),
+                            "story_name": format_story_name(stories.value),
                             "pad": pad,
                         }
                     )
