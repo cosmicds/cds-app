@@ -204,6 +204,7 @@ class BaseAPI:
                 "expected_size": info["expected_size"],
                 "asynchronous": info["asynchronous"],
                 "story_name": info["story_name"],
+                "options": { "pad": info["pad"] },
             },
         )
 
