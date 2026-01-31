@@ -73,7 +73,25 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
     if subset is None:
         main_label = "Your Class"
         main_color = subset_color
-
+    
+    # for students in the merged class, let's remove the student_id so doesn't show up in hover
+    if (merged_subset is not None) and include_merged:
+        merged_student_ids = set(data['student_id'][merged_subset].to_list())
+        # id_string = df_agg['student_id'].to_list() # the result of sids_agg is a string with <br> separated student ids // we need to filter out those in the merged class
+        # new_id_string = []
+        for row in range(len(df_agg)):
+            sids = df_agg.at[row, 'student_id'].split('<br>')
+            names = df_agg.at[row, 'name'].split('<br>')
+            filtered_sids = [sid for sid in sids if sid not in merged_student_ids]
+            # want to filer names via index of sids
+            filtered_names = [names[i] for i in range(len(sids)) if sids[i] not in merged_student_ids]
+            if len(filtered_sids) == 0:
+                df_agg.at[row, 'student_id'] = ''
+                df_agg.at[row, 'name'] = ''
+            else:
+                df_agg.at[row, 'student_id'] = '<br>'.join(filtered_sids)
+                df_agg.at[row, 'name'] = '<br>'.join(filtered_names)
+        
     fig = px.bar(data_frame = df_agg, x = which, y='count', hover_data='name', labels = labels, barmode='overlay', opacity=1, template=plotly_theme)
     fig.update_traces(hovertemplate = labels[which] + ': %{x}<br>' + 'count=%{y}<br>' + labels['student_id'] + ': %{customdata}' + '<extra></extra>', width=0.8)
 

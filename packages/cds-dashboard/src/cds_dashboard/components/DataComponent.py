@@ -330,12 +330,12 @@ def DataHistogram(roster: Reactive[Roster] | Roster = None, id_col = 'student_id
                        subset_color = '#0097A7',
                        show_merged= True,
                        include_merged = True,
-                       merged_color= MERGED_COLOR)
+                       merged_color= "#BBBBBB")
     else:
         
         AgeHoHistogram(data, 
             merged_subset = merged_subset,
-            merged_color= MERGED_COLOR,
+            merged_color= "#BBBBBB",
             include_merged=True,
             show_merged=True,
             )
