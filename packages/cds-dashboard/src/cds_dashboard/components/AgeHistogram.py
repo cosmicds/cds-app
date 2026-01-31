@@ -3,6 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from solara.lab.components import use_dark_effective
 from collections import Counter
+import numpy as np
 
 from numpy import nanmin, nanmax, isnan
 
@@ -22,7 +23,7 @@ def aggregrate(dataframe, col):
 
 
 @solara.component
-def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset = None, subset_label = None, main_label = None, subset_color = '#0097A7', main_color = '#BBBBBB', title = None):
+def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset = None, subset_label = None, main_label = None, subset_color = '#0097A7', main_color = '#BBBBBB', title = None, merged_subset= None, merged_color = '#3e3e3e', show_merged = True, include_merged = True):
     # subset is boolean array which take subset of data
     
     # manual aggregation. instead use pandas groupby and agg
@@ -33,9 +34,18 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
     def name_agg(names):
         return '<br>'+ '<br>'.join(names)
     
+    # yeah, in this view we don't what they did or did not see
     subset = None
+    
 
-    df_agg = data.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg), name = ('name', name_agg))
+    def return_agged(data, which):
+        return data.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg), name = ('name', name_agg))
+
+    if (merged_subset is not None) and (not include_merged):
+        df_agg = return_agged(data[~np.array(merged_subset)], which)
+    else:
+        df_agg = return_agged(data, which)
+        
     # add single valued column
     df_agg['group'] = 'Full Class'
     if len(df_agg) == 0:
@@ -61,7 +71,7 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
         plot_bgcolor = "white"
         
     if subset is None:
-        main_label = "Full Class"
+        main_label = "Your Class"
         main_color = subset_color
 
     fig = px.bar(data_frame = df_agg, x = which, y='count', hover_data='name', labels = labels, barmode='overlay', opacity=1, template=plotly_theme)
@@ -69,7 +79,7 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
 
     if subset is None:
         main_color = subset_color
-        main_label = "Full Class"
+        main_label = "Your Class"
 
     fig.update_traces(marker_color=main_color)
     fig.add_trace(go.Bar(x=[None], y=[None], name = main_label, marker_color = main_color))
@@ -82,9 +92,23 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
     
     
     
+    if include_merged and show_merged and merged_subset is not None:
+        data_merged = data[merged_subset]
+        df_agg_merged = return_agged(data_merged, which)
+        bar = go.Bar(x=df_agg_merged[which], y=df_agg_merged['count'],
+                     name=f'Ages from merged class', 
+                     opacity=1, 
+                     width=0.8,
+                     marker_color=merged_color,
+                     hoverinfo='skip', 
+                     customdata=df_agg_merged['student_id'])
+        bar.hovertemplate = labels[which] + ': %{x}<br>' + 'count=%{y}<br>' + labels['student_id'] + ': %{customdata}' + '<extra></extra>'
+        fig.add_trace(bar)
+    
     if subset is not None:
-        data_subset = data[subset]
-        df_agg_subset = data_subset.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg))
+        data_subset = data[np.array(subset) & (~np.array(merged_subset) if merged_subset is not None else True)]
+        # df_agg_subset = data_subset.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg))
+        df_agg_subset = return_agged(data_subset, which)
         bar = go.Bar(x=df_agg_subset[which], y=df_agg_subset['count'],
                      name=subset_label, 
                      opacity=1, 
@@ -93,12 +117,13 @@ def AgeHoHistogram(data, selected = solara.Reactive(None), which = 'age', subset
                      hoverinfo='skip', 
                      customdata=df_agg_subset['student_id'])
         bar.hovertemplate = labels[which] + ': %{x}<br>' + 'count=%{y}<br>' + labels['student_id'] + ': %{customdata}' + '<extra></extra>'
-
+        fig.add_trace(bar)
 
     if selected.value is not None:
         data_subset = data[data['student_id']==str(selected.value)]
         if len(data_subset) > 0:
-            df_agg_subset = data_subset.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg))
+            # df_agg_subset = data_subset.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg))
+            df_agg_subset = return_agged(data_subset, which)
             bar = go.Bar(x=df_agg_subset[which], y=df_agg_subset['count'],
                         name=str(selected.value), 
                         opacity=1, 
