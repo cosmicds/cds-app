@@ -16,6 +16,7 @@ from solara.reactive import Reactive
 from typing import Optional, cast
 from solara.alias import rv
 
+MERGED_COLOR = '#87ed09'
 def get_class_subset(data, sid, class_data_students = None, ungroup = True):
     if isinstance(sid, solara.Reactive):
         sid = sid.value
@@ -26,8 +27,7 @@ def get_class_subset(data, sid, class_data_students = None, ungroup = True):
     if 'last_modified' not in data.columns:
         return [True for i in range(len(data))]
     
-    use_class_data_students = class_data_students is not None
-    
+    use_class_data_students = class_data_students is not None and len(class_data_students) > 0
     # convert last_modified to datetime
     data['last_modified'] = to_datetime(data['last_modified'])
     data['student_id'] = data['student_id'].apply(str)
@@ -50,7 +50,7 @@ def get_class_subset(data, sid, class_data_students = None, ungroup = True):
         complete = (size == 5)
     
     if use_class_data_students:
-        subset = in_class | (time.index == sid)
+        subset = in_class  | (time.index == sid)
     else:
         before = time['last_modified'] <= time[time.index == sid]['last_modified'].max()    
         ten_earlist_completed = time[complete].sort_values('last_modified').head(10)
@@ -70,6 +70,8 @@ def get_class_subset(data, sid, class_data_students = None, ungroup = True):
     
     return subset
 
+def get_merged_subset(data, class_id):
+    return data.apply(lambda row: any(map(lambda x: x['id'] != class_id, row['student'].get('Classes', [{'id': class_id}]))),axis=1).to_list()
 
 
 @solara.component
@@ -105,6 +107,10 @@ def DataSummary(roster: Reactive[Roster] | Roster = None, student_id = None, on_
             on_student_id(None)
     
     subset = None
+    merged_subset = get_merged_subset(data, roster.class_id)
+
+    if not any(merged_subset):
+        merged_subset = None
     main_name = None
     subset_name = None
     class_data_students = None
@@ -116,16 +122,24 @@ def DataSummary(roster: Reactive[Roster] | Roster = None, student_id = None, on_
             # if len(class_data_students) == 0:
             #     class_data_students = None
         # solara.Markdown(f"{class_data_students}")
+        
         subset = get_class_subset(data, student_id, 
                                   class_data_students = class_data_students, 
                                   ungroup = True)
         main_name = f'Data not seen by {student_id.value}'
         subset_name = f'Data seen by {student_id.value}'
+        # merged_subset = None
+    else:
+        if merged_subset is not None:
+            subset = [not m for m in merged_subset]
+            main_name = f'Merged student data'
+            subset_name = f'Students in your class'
+    
     
     if allow_click:
-        ClassPlot(data, on_click=on_plot_click, label_col='name', select_on = 'student_id', selected = student_id, allow_click=True, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', show_hubble = show_hubble.value, show_hst = show_hst.value)
+        ClassPlot(data, on_click=on_plot_click, label_col='name', select_on = 'student_id', selected = student_id, allow_click = True , seen_by_student = subset, merged = merged_subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', merged_color=MERGED_COLOR, show_hubble = show_hubble.value, show_hst = show_hst.value)
     else:
-        ClassPlot(data, select_on = 'student_id', label_col='name', selected = student_id, allow_click = False, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', show_hubble = show_hubble.value, show_hst = show_hst.value)
+        ClassPlot(data,                         label_col='name', select_on = 'student_id', selected = student_id, allow_click = False, seen_by_student = subset, merged = merged_subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB', merged_color=MERGED_COLOR, show_hubble = show_hubble.value, show_hst = show_hst.value)
     with rv.Row(justify='start'):
         solara.Button(
             label = f"{'Hide' if show_hubble.value else 'Show'} Edwin Hubble's Data", 
@@ -256,7 +270,7 @@ def StudentAgeHubble(roster: Reactive[Roster] | Roster = None, sid = None, allow
                         """)
 
 @solara.component
-def DataHistogram(roster: Reactive[Roster] | Roster = None, id_col = 'student_id',  sid = None):
+def DataHistogram(roster: Reactive[Roster] | Roster = None, id_col = 'student_id',  sid = None, show_merged = True, include_merged = True):
     """
     Display a single student's data
     """
@@ -287,7 +301,13 @@ def DataHistogram(roster: Reactive[Roster] | Roster = None, id_col = 'student_id
     data['age'] = data['age'].apply(lambda x: around(x,0))
     
     class_data_students = None
-
+    merged_subset_raw = get_merged_subset(dataframe, roster.class_id)
+    if len(merged_subset_raw) == 0:
+        merged_subset = None
+    else:
+        # Convert row-level merged_subset to student-level for aggregated data
+        merged_students = dataframe[merged_subset_raw]['student_id'].unique()
+        merged_subset = data['student_id'].apply(float).isin(merged_students).to_list()
     if sid is not None and sid.value is not None:
         
         idx = roster.student_ids.index(sid.value)
@@ -304,11 +324,21 @@ def DataHistogram(roster: Reactive[Roster] | Roster = None, id_col = 'student_id
         AgeHoHistogram(data, 
                        subset = subset, 
                        selected = sid,
+                       merged_subset = merged_subset,
                        main_label = f'Data not seen by {sid.value}',
                        subset_label = f'Data seen by {sid.value}', 
-                       subset_color = '#0097A7')
+                       subset_color = '#0097A7',
+                       show_merged= True,
+                       include_merged = True,
+                       merged_color= "#BBBBBB")
     else:
-        AgeHoHistogram(data)
+        
+        AgeHoHistogram(data, 
+            merged_subset = merged_subset,
+            merged_color= "#BBBBBB",
+            include_merged=True,
+            show_merged=True,
+            )
 
 @solara.component
 def StudentStats(roster: Reactive[Roster] | Roster):

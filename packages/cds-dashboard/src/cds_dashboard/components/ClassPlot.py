@@ -2,7 +2,7 @@ import solara
 from solara.lab.components import use_dark_effective
 import plotly.express as px
 import plotly.graph_objects as go
-
+import numpy as np
 from ..logger_setup import logger
 
 from ..data.load_data import hubble_data, hst_data
@@ -17,11 +17,14 @@ def ClassPlot(dataframe,
             select_on = None,
             selected = solara.reactive(None),
             allow_click = True,
-            subset = None,
+            seen_by_student = None,
+            in_class = None,
+            merged = None,
             subset_label = None,
             main_label = None,
             subset_color='#0097A7',
             main_color='#BBBBBB',
+            merged_color = '#3e3e3e',
             show_hubble = True,
             show_hst = True
               ):
@@ -69,11 +72,14 @@ def ClassPlot(dataframe,
                y_col: "{label} ({units})".format(**xy_label['y'])}
     fig = px.scatter(dataframe, x=x_col, y=y_col, custom_data = label_col, labels = labels, template=plotly_theme)
     
-    if subset is None and selected.value is None:
+    if seen_by_student is None and selected.value is None:
         main_color = subset_color
         main_marker_size = 7
         main_label = 'Full Class'
     else:
+        main_marker_size = 5
+    
+    if merged is not None:
         main_marker_size = 5
         
 
@@ -117,10 +123,23 @@ def ClassPlot(dataframe,
                                             marker_size = 7,
                                             zorder=-1,
                                             marker_color = '#80bc8d'))
+                                            
+    if selected.value is not None and merged is not None:
+        logger.debug('Adding merged trace')
+        sub_data = dataframe[merged]
+        hovertemplate = '<b>%{customdata}</b><br>' + xlabel + '<br>' + ylabel
+        fig.add_trace(go.Scatter(x= sub_data[x_col], y= sub_data[y_col], mode = 'markers',
+                                            customdata = sub_data[label_col],
+                                            hovertemplate = hovertemplate,
+                                            name = f'(Merged) Data seen by {selected.value}',
+                                            marker_symbol = 'circle',   
+                                            marker_size = 5,
+                                            marker_color = merged_color))
     
-    if subset is not None:
+    
+    if  seen_by_student is not None:
         logger.debug('Adding seen trace')
-        sub_data = dataframe[subset]
+        sub_data = dataframe[np.array(seen_by_student) & (~np.array(merged) if merged is not None else True)]
         hovertemplate = '<b>%{customdata}</b><br>' + xlabel + '<br>' + ylabel
         fig.add_trace(go.Scatter(x= sub_data[x_col], y= sub_data[y_col], mode = 'markers',
                                             customdata = sub_data[label_col],
@@ -133,6 +152,11 @@ def ClassPlot(dataframe,
     if selected.value is not None:    
         logger.debug('Adding student trace')
         stud_data = dataframe[dataframe[select_on] == str(selected.value)]
+        if len(stud_data) == 0:
+            stud_data = dataframe[dataframe[select_on] == int(selected.value)]
+        
+        if len(stud_data) == 0:
+            logger.debug(f'No data for selected student {selected.value}')
 
         hovertemplate = '<b>%{customdata}</b><br>' + xlabel + '<br>' + ylabel
         fig.add_trace(go.Scatter(x= stud_data[x_col], y= stud_data[y_col], mode = 'markers',
