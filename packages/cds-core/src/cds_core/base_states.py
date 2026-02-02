@@ -242,8 +242,9 @@ class BaseStageState(BaseState):
         # first enum value is always 1
         first = 1  # self.current_step.first().value
         # last = self.total_steps + first #self.current_step.last().value
-        current = self.current_step.value
-        return (current - first + 1) / self.total_steps
+        max_step = self.max_step.value
+        return (max_step - first + 1) / self.total_steps
+    
 
     def is_current_step(self, step: BaseMarker):
         return self.current_step.value == step.value
