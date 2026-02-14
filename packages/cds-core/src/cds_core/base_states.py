@@ -239,11 +239,10 @@ class BaseStageState(BaseState):
     @computed_field
     @property
     def progress(self) -> float:
-        # first enum value is always 1
-        first = 1  # self.current_step.first().value
-        # last = self.total_steps + first #self.current_step.last().value
-        current = self.current_step.value
-        return (current - first + 1) / self.total_steps
+        # TODO: this is inaccurate as it will always show that some progress
+        #  has been made even if the user is on the first step. Likewise,
+        #  stages with total steps of 1 will always show full progress.
+        return self.max_step / self.total_steps
 
     def is_current_step(self, step: BaseMarker):
         return self.current_step.value == step.value
