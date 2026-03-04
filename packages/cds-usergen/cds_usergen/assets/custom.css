@@ -1,0 +1,5 @@
+.solara-markdown pre#preview-json {
+    padding-inline: 10px;
+    background-color: #a5a5a5 !important;
+    color: black;
+}
