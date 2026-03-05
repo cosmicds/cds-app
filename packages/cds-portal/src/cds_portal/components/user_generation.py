@@ -26,7 +26,7 @@ def CreateStudentAccountsDialog(classes):
     )
     if selected_class_code.value:
         # solara.Text(f"{selected_class.value}")
-        CreateStudentsForClass(selected_class_code, howManyValue=expected_size)
+        CreateStudentsForClass(selected_class_code, howManyValue=expected_size, padding = 5)
 
 
 

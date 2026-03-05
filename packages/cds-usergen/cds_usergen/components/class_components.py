@@ -109,6 +109,7 @@ def GenerateForClassButton(
 def CreateStudentsForClass(
     class_code_value="",
     howManyValue=0,
+    padding=0,
 ):
     solara.Title("Create Usernames")
     # --- Per-session reactive state (use_reactive) ---
@@ -127,7 +128,10 @@ def CreateStudentsForClass(
     class_user_count = solara.use_reactive(0)
     create_more = solara.use_reactive(False)
     start_index = solara.use_reactive(1)
-    howMany = solara.use_reactive(howManyValue)
+    howManyValueRef = solara.use_reactive(howManyValue)
+    @computed
+    def howMany():
+        return howManyValueRef.value + padding
     end_index = solara.use_reactive(howMany.value if howMany.value > 0 else 1)
 
     # Load connection on mount
@@ -205,7 +209,10 @@ def CreateStudentsForClass(
                     solara.Info(f"There are {class_user_count.value} usernames already assigned to this class. You may not create more")
                     return
                 
-                solara.Text(f"Creating {howMany.value} usernames for class code: {class_code.value}")
+                if padding > 0:
+                    solara.Text(f"Creating {howMany.value - padding} (+{padding} extra) usernames for class code: {class_code.value}")
+                else:
+                    solara.Text(f"Creating {howMany.value} usernames for class code: {class_code.value}")
                 with solara.Row():
                     SetUsernamePrefix(prefix, howMany)
                         
