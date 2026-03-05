@@ -4,7 +4,6 @@ from solara.lab import use_task, Task, computed
 
 from . import auth0
 
-from ..components import ValidatedTextInput
 from ..validation import validate_username, username_error_message, numDigits
 
 """
