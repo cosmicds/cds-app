@@ -8,6 +8,7 @@ import json
 import asyncio
 from io import StringIO
 import re
+from typing import Optional
 
 from ..components import ValidatedTextInput, ValidatedInputInt
 from ..validation import validate_username, username_error_message, numDigits
@@ -103,6 +104,52 @@ def UsernameInputs(howMany: solara.Reactive[int], prefix: solara.Reactive[str], 
 
 
 @solara.component
+def PasswordInput(password: solara.Reactive[Optional[str]], use_username_as_password: solara.Reactive[bool]):
+    password_input = solara.use_reactive(password.value or "")
+
+    @computed
+    def password_error():
+        if use_username_as_password.value:
+            return None
+        if len(password_input.value) == 0:
+            return "Password required when not using username as password."
+        if len(password_input.value) < 5:
+            return "Password must be 5 or more characters long."
+        if " " in password_input.value:
+            return "Password cannot contain spaces."
+        return None
+
+    def sync_password_mode():
+        if use_username_as_password.value:
+            password.set(None)
+            password_input.set("")
+
+    def sync_password_value():
+        password.set(password_input.value or None)
+
+    solara.use_effect(sync_password_mode, [use_username_as_password.value])
+    solara.use_effect(sync_password_value, [password_input.value])
+
+    with solara.Row():
+        with solara.Columns(widths=[1, 2]):
+            solara.Checkbox(
+                label="Use username as password",
+                value=use_username_as_password,
+            )
+
+            if not use_username_as_password.value:
+                with solara.Column():
+                    solara.Text("Set a common password for all users (not recommended).")
+                    solara.InputText(
+                        label="Set common password for all users",
+                        value=password_input,
+                        continuous_update=True,
+                    )
+                    if password_error.value:
+                        solara.Error(password_error.value)
+
+
+@solara.component
 def GenerateButton(
     connection_id: solara.Reactive,
     job: solara.Reactive,
@@ -110,6 +157,8 @@ def GenerateButton(
     howMany: solara.Reactive[int],
     prefix: solara.Reactive[str],
     email_domain: solara.Reactive[str] = None,
+    password: solara.Reactive[Optional[str]] = None,
+    use_username_as_password: solara.Reactive[bool] = None,
 ):
     """
     Submit the request to create the usernames to auth0
@@ -131,7 +180,14 @@ def GenerateButton(
             
         if connection_id.value is None:
             raise ValueError("Connection ID is not loaded yet.")
-        users = auth0.create_user_file(prefix.value, domain=email_domain.value, N=howMany.value, create_file=False)
+        password_value = None if use_username_as_password.value else (password.value or None) # '' or None => None
+        users = auth0.create_user_file(
+            prefix.value,
+            domain=email_domain.value,
+            N=howMany.value,
+            password=password_value,
+            create_file=False
+        )
         user_json_string = json.dumps(users, indent=4)
         file_like_object = StringIO(user_json_string)
         job.value = auth0.start_import_job(
@@ -161,7 +217,19 @@ def GenerateButton(
         solara.Error("That username is already use [TODO: Implement better checkes]")
     solara.Button(
         label="Generate Users",
-        disabled=(username_error.value != '' or howMany.value <= 0 or prefix.value == ''),
+        disabled=(
+            username_error.value != ''
+            or howMany.value <= 0
+            or prefix.value == ''
+            or (
+                (not use_username_as_password.value) 
+                and (
+                    (password.value is None) 
+                    or len(password.value) < 5 
+                    or " " in password.value
+                    )
+                )
+        ),
         on_click=check_and_maybe_create,
     )
 
@@ -255,15 +323,25 @@ def ValidationEffect(howMany: solara.Reactive[int], prefix: solara.Reactive[str]
 
 
 @solara.component
-def JSONPreview(prefix: solara.Reactive[str], howMany: solara.Reactive[int], email_domain: solara.Reactive[str] = None):
+def JSONPreview(
+    prefix: solara.Reactive[str],
+    howMany: solara.Reactive[int],
+    email_domain: solara.Reactive[str] = None,
+    password: solara.Reactive[Optional[str]] = None,
+    use_username_as_password: solara.Reactive[bool] = None,
+):
     trigger = solara.use_reactive(0)
 
     async def generate_preview():
         if trigger.value == 0:
             return None
-        prev = auth0.create_user_file(prefix.value, domain=email_domain.value, N=howMany.value, create_file=False)
+        password_payload = None if use_username_as_password.value else (password.value or None)
+        prev = auth0.create_user_file(prefix.value, domain=email_domain.value, N=howMany.value, password=password_payload, create_file=False)
         [user.pop('password_hash') for user in prev]
-        [user.update({'password': user['username']}) for user in prev]
+        if password_payload is None:
+            [user.update({'password': user['username']}) for user in prev]
+        else:
+            [user.update({'password': password_payload}) for user in prev]
         return json.dumps(prev, indent=4)
 
     task = use_task(generate_preview, dependencies=[trigger.value])
@@ -296,6 +374,8 @@ def Page():
     howMany = solara.use_reactive(2)
     prefix = solara.use_reactive('testuser')
     email_domain = solara.use_reactive(EMAIL_DOMAIN)
+    password = solara.use_reactive(None)
+    use_username_as_password = solara.use_reactive(True)
 
     # Load connection on mount
     ready = solara.use_reactive(False)
@@ -307,9 +387,10 @@ def Page():
             with solara.Column():
                 
                 UsernameInputs(howMany, prefix, email_domain)
+                PasswordInput(password, use_username_as_password)
                 ValidationEffect(howMany, prefix, username_error)
-                GenerateButton(connection_id, job, username_error, howMany, prefix, email_domain)
+                GenerateButton(connection_id, job, username_error, howMany, prefix, email_domain, password, use_username_as_password)
                 SearchButton(connection_id, prefix, email_domain)
                 JobStatusPanel(job, connection_id)
     with solara.Column():
-        JSONPreview(prefix, howMany, email_domain)
+        JSONPreview(prefix, howMany, email_domain, password, use_username_as_password)
