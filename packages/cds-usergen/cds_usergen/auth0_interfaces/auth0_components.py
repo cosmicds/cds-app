@@ -33,7 +33,7 @@ def get_connection():
 
 
 @solara.component
-def MakeConnection(ready, connection_id):
+def MakeConnection(ready, connection_id, quiet = False):
     async def load_connection():
         cid, token = get_connection()
         connection_id.value = cid
@@ -41,8 +41,11 @@ def MakeConnection(ready, connection_id):
     loaded = use_task(load_connection, dependencies=[])
     
     if not loaded.finished:
-        solara.Warning("Connecting to Auth0...")
+        if not quiet:
+            solara.Warning("Connecting to Auth0...")
+        else:
+            solara.ProgressLinear(True, color='warning')
     elif loaded.finished:
         ready.set(True)
     else:
-        solara.Error("Panic!")
+        solara.Error("Can not begin account creation. Try again later or contact the CosmicDS team for help")
