@@ -199,11 +199,11 @@ def GenerateButton(
     
     # TODO: Better checks and logic
     def search_users_action():
-        print(f'username:{prefix.value}* AND email:{prefix.value}*@{email_domain.value}')
+        print(f'username:{prefix.value}*')
         return auth0.search_users(
             domain=auth0.DOMAIN,
             access_token=auth0.BEAERER_TOKEN,
-            query=f'username:{prefix.value}* AND email:{prefix.value}*@{email_domain.value}'
+            query=f'username:{prefix.value}*'
         )
     
     def check_and_maybe_create():
@@ -211,6 +211,7 @@ def GenerateButton(
         if len(users) > 0:
             can_submit.value = False
             return
+        can_submit.value = True
         create_users_action()
     
     if not can_submit.value:
@@ -254,7 +255,8 @@ def SearchButton(
             domain=auth0.DOMAIN,
             access_token=auth0.BEAERER_TOKEN,
             # username:*<prefix>* AND email:*@<EMAIL_DOMAIN>*
-            query=f'username:{prefix.value}* AND email:{prefix.value}*@{email_domain.value}'
+            # query=f'username:{prefix.value}* AND email:{prefix.value}*@{email_domain.value}'
+            query=f'username:{prefix.value}*'
         )
         # begins with prefix followd by at least one digit (at the end)
         pattern = re.compile(rf"^{prefix.value}\d+$")
@@ -268,7 +270,8 @@ def SearchButton(
     )
     
     if users.value is not None and len(users.value) > 0:
-        solara.Text(f"Searched for username:{prefix.value}\d+ AND email:{prefix.value}*@{email_domain.value}")
+        # solara.Text(f"Searched for username:{prefix.value}\d+ AND email:{prefix.value}*@{email_domain.value}")
+        solara.Text(f"Searched for username:{prefix.value}\d+")
         solara.Markdown(f"<pre>{json.dumps(users.value, indent=4)}</pre>")
     
 
