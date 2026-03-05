@@ -12,6 +12,7 @@ import time
 from dotenv import load_dotenv
 from pathlib import Path
 from io import StringIO
+from math import ceil
 
 # auth0 username max length
 MAX_USERNAME_LENGTH = 5  # Auth0 username max length
@@ -113,10 +114,13 @@ def create_user(prefix="user", domain="example.com", password=None, i=1):
         "name": f"{username}@{domain}",
         "nickname": username,  # optional
         "username": username,
+        "family_name": prefix,
     }
 
 
-def create_user_from_username_and_password(username, domain="example.com", password=None):
+def create_user_from_username_and_password(username, prefix, domain="example.com", password=None):
+    if prefix is None:
+        raise ValueError("create_user_from_username_and_password requires you to pass a prefix for the user_metadata")
     if password is None:
         password = username
     return {
@@ -126,6 +130,7 @@ def create_user_from_username_and_password(username, domain="example.com", passw
         "name": f"{username}@{domain}",
         "nickname": username,  # optional
         "username": username,
+        "family_name": prefix,
     }
 
 
@@ -139,12 +144,12 @@ def create_users(prefix, domain="example.com", N=5, password=None):
     return [create_user(prefix, domain, password, i) for i in range(1, N + 1)]
 
 
-def create_users_with_passwords(usernames, passwords=None, domain="example.com"):
+def create_users_with_passwords(usernames, prefix, passwords=None, domain="example.com"):
     if passwords is None:
-        return [create_user_from_username_and_password(u, domain=domain, password=None) for u in usernames]
+        return [create_user_from_username_and_password(u, prefix, domain=domain, password=None) for u in usernames]
     if len(usernames) != len(passwords):
         raise ValueError(f"usernames and passwords must have the same length: len(users) {len(usernames)}, len(pass) {len(passwords)}")
-    return [create_user_from_username_and_password(u, domain=domain, password=p) for u, p in zip(usernames, passwords)]
+    return [create_user_from_username_and_password(u, prefix, domain=domain, password=p) for u, p in zip(usernames, passwords)]
 
 
 # Create a JSON file with user data for bulk import.
@@ -171,12 +176,12 @@ def create_user_file(prefix, domain="example.com", N=5, password=None, id=None, 
 
 
 # Create a JSON import payload using explicit username/password lists.
-def create_user_file_from_list(usernames, passwords=None, domain="example.com", create_file=True):
+def create_user_file_from_list(usernames, prefix, passwords=None, domain="example.com", create_file=True):
     """
     Create users from parallel username/password lists.
     Pass `passwords=None` to use each username as the password.
     """
-    users = create_users_with_passwords(usernames, passwords, domain)
+    users = create_users_with_passwords(usernames, prefix, passwords, domain)
 
     if not create_file:
         return users
