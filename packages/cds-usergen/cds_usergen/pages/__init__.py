@@ -13,6 +13,10 @@ from typing import Optional
 from ..components import ValidatedTextInput, ValidatedInputInt
 from ..validation import validate_username, username_error_message, numDigits
 
+
+def getUsername(prefix: str, suffix_length: int, i: int):
+    return f"{prefix}{i:0{suffix_length}d}"
+
 """
  TODO: Get Class info
   - display class info for the teachers
@@ -85,7 +89,8 @@ def UsernameInputs(howMany: solara.Reactive[int], prefix: solara.Reactive[str], 
                     validator=lambda v: validate_username(v, howMany.value),
                     error_message=lambda v: username_error_message(v, howMany.value),
                 )
-                solara.Text(f"Username preview: {prefix.value}01")
+                n = numDigits(howMany.value)
+                solara.Text(f"Username preview: {getUsername(prefix.value, n, 1)}")
 
     with solara.Row():
         with solara.Columns(widths=[1, 2]):
@@ -181,11 +186,13 @@ def GenerateButton(
         if connection_id.value is None:
             raise ValueError("Connection ID is not loaded yet.")
         password_value = None if use_username_as_password.value else (password.value or None) # '' or None => None
-        users = auth0.create_user_file(
-            prefix.value,
+        suffix_width = numDigits(howMany.value)
+        usernames = [getUsername(prefix.value, suffix_width, i) for i in range(1, howMany.value + 1)]
+        passwords = None if use_username_as_password.value else [password_value] * len(usernames)
+        users = auth0.create_user_file_from_list(
+            usernames=usernames,
+            passwords=passwords,
             domain=email_domain.value,
-            N=howMany.value,
-            password=password_value,
             create_file=False
         )
         user_json_string = json.dumps(users, indent=4)

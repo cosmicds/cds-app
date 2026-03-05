@@ -116,6 +116,19 @@ def create_user(prefix="user", domain="example.com", password=None, i=1):
     }
 
 
+def create_user_from_username_and_password(username, domain="example.com", password=None):
+    if password is None:
+        password = username
+    return {
+        "email": f"{username}@{domain}",
+        "email_verified": True,
+        "password_hash": hash_password(password),
+        "name": f"{username}@{domain}",
+        "nickname": username,  # optional
+        "username": username,
+    }
+
+
 # Create a list of users with the same prefix and domain.
 def create_users(prefix, domain="example.com", N=5, password=None):
     return [create_user(prefix, domain, password, i) for i in range(1, N + 1)]
@@ -124,6 +137,14 @@ def create_users(prefix, domain="example.com", N=5, password=None):
 # Create a JSON file with user data for bulk import.
 def create_users(prefix, domain="example.com", N=5, password=None):
     return [create_user(prefix, domain, password, i) for i in range(1, N + 1)]
+
+
+def create_users_with_passwords(usernames, passwords=None, domain="example.com"):
+    if passwords is None:
+        return [create_user_from_username_and_password(u, domain=domain, password=None) for u in usernames]
+    if len(usernames) != len(passwords):
+        raise ValueError(f"usernames and passwords must have the same length: len(users) {len(usernames)}, len(pass) {len(passwords)}")
+    return [create_user_from_username_and_password(u, domain=domain, password=p) for u, p in zip(usernames, passwords)]
 
 
 # Create a JSON file with user data for bulk import.
@@ -143,6 +164,24 @@ def create_user_file(prefix, domain="example.com", N=5, password=None, id=None, 
         return users
 
     filename = f"{prefix}_users.json"
+    with open(filename, "w") as f:
+        json.dump(users, f, indent=4)
+    print(f"Created {filename} with {len(users)} users.")
+    return filename
+
+
+# Create a JSON import payload using explicit username/password lists.
+def create_user_file_from_list(usernames, passwords=None, domain="example.com", create_file=True):
+    """
+    Create users from parallel username/password lists.
+    Pass `passwords=None` to use each username as the password.
+    """
+    users = create_users_with_passwords(usernames, passwords, domain)
+
+    if not create_file:
+        return users
+
+    filename = f"{usernames[0]}_users.json"
     with open(filename, "w") as f:
         json.dump(users, f, indent=4)
     print(f"Created {filename} with {len(users)} users.")
