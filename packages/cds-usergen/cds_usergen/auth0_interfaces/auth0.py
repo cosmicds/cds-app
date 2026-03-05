@@ -292,25 +292,52 @@ def search_users(domain, access_token, query: str):
     """
     query fiven in Lucene syntax
     # o = search_users(DOMAIN, MGMT_API_ACCESS_TOKEN, "email:*nodeclass*")
+    
+    An API has the following rate limit:
+    Burst Limit: 1000
+    Sustained Rate Limit: 100 requests per second (on a fixed window)
+    We are running at 10 requests per second and well under the 1000 burst
     """
     url = f"https://{domain}/api/v2/users"
     headers = {"Authorization": f"Bearer {access_token}"}
     # query parameters
-    params = {
-        "fields": "username,email,user_id",
+    per_page = 75
+    get_params = lambda page: {
+        "fields": "username,email,user_id,family_name",
         "include_fields": "true",
         "q": query,
+        "include_totals":"true",
+        "per_page": per_page,
+        "page": page,
     }
-    response = requests.get(url, headers=headers, params=params)
-    print(response.url)
-    if response.status_code == 200:
-        users = response.json()
-        print(f"Found {len(users)} users.")
-        return users
-    else:
-        print("❌ Error during user search:")
-        print(response.status_code, response.text)
-    return None
+    users = []
+    total = 0
+    def get_users_page(page):
+        response = requests.get(url, headers=headers, params=get_params(page))
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('users') is not None:
+                users.extend(data.get('users'))
+                print(f"Found {len(users)} users.")
+            else:
+                print("❌ Request status 200, but 'users' is None!")
+            return data.get('total', 0)
+        else:
+            print("❌ Error during user search:")
+            print(response.status_code, response.text)
+        return data.get('total', 0)
+    
+    current_page = 0
+    total = get_users_page(current_page)
+    current_page += 1
+    total_pages = ceil(total / per_page)
+    while current_page < total_pages:
+        get_users_page(current_page)
+        current_page += 1
+        time.sleep(0.1)
+    return users
+        
+    
 
 
 def delete_user(domain, access_token, user_id):
