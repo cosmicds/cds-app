@@ -455,6 +455,9 @@ def Page():
                         disabled=len(selected_rows.value) != 1,
                         class_="ma-2 black--text",
                     )    
+                    
+                    # let's keep it in manage students
+                    # CreateStudentAccountsButton(data.value)
 
                 # DeleteClassDialog(
                 #             len(selected_rows.value) == 0, _delete_class_callback

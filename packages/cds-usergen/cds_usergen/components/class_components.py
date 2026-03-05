@@ -107,7 +107,7 @@ def GenerateForClassButton(
 
 @solara.component
 def CreateStudentsForClass(
-    class_code="",
+    class_code_value="",
     howManyValue=0,
 ):
     solara.Title("Create Usernames")
@@ -116,7 +116,10 @@ def CreateStudentsForClass(
     job = solara.use_reactive(None)
     username_error = solara.use_reactive("")
     prefix = solara.use_reactive("")
-    email_domain = solara.use_reactive(f"{class_code}.edu")
+    class_code = solara.use_reactive(class_code_value)
+    @computed
+    def email_domain():
+        return f"{class_code.value}.class"
     password = solara.use_reactive(None)
     use_username_as_password = solara.use_reactive(True)
 
@@ -124,13 +127,13 @@ def CreateStudentsForClass(
     class_user_count = solara.use_reactive(0)
     create_more = solara.use_reactive(False)
     start_index = solara.use_reactive(1)
-    end_index = solara.use_reactive(howManyValue if howManyValue > 0 else 1)
+    howMany = solara.use_reactive(howManyValue)
+    end_index = solara.use_reactive(howMany.value if howMany.value > 0 else 1)
 
     # Load connection on mount
     ready = solara.use_reactive(False)
     MakeConnection(ready, connection_id, quiet=True)
 
-    howMany = solara.reactive(howManyValue)
 
 
     async def search_class_users():
@@ -140,10 +143,9 @@ def CreateStudentsForClass(
             domain=auth0.DOMAIN,
             access_token=auth0.BEAERER_TOKEN,
             query=f"email:*@{email_domain.value}",
-        )       
-        return users
+        )
 
-    class_users_task = use_task(search_class_users, dependencies=[connection_id.value])
+    class_users_task = use_task(search_class_users, dependencies=[connection_id.value, class_code.value])
     
     def parse_pattern(user):
         if user.get('family_name', None):
@@ -180,6 +182,18 @@ def CreateStudentsForClass(
 
     solara.use_effect(sync_end_index, [howMany.value, start_index.value])
 
+    def reset_state():
+        job.set(None)
+        username_error.set("")
+        prefix.set("")
+        password.set(None)
+        use_username_as_password.set(True)
+        class_user_count.value = 0
+        start_index.set(1)
+        sync_end_index()
+
+    solara.use_effect(reset_state, [class_code.value, howMany.value])
+
     if not class_users_task.finished:
         solara.ProgressLinear(True, color='red')
         return
@@ -191,7 +205,7 @@ def CreateStudentsForClass(
                     solara.Info(f"There are {class_user_count.value} usernames already assigned to this class. You may not create more")
                     return
                 
-                solara.Text(f"Creating usernames for class code: {class_code}")
+                solara.Text(f"Creating {howMany.value} usernames for class code: {class_code.value}")
                 with solara.Row():
                     SetUsernamePrefix(prefix, howMany)
                         
