@@ -1,7 +1,6 @@
 import re
 from math import log10, floor
-
-MAX_USERNAME_LENGTH = 15
+from .auth0_interfaces import auth0
 
 # Only allow alphanumeric characters and underscores
 _INVALID_CHARS_PATTERN = re.compile(r'[^a-z0-9_]')
@@ -25,7 +24,7 @@ def _total_length(prefix: str, how_many: int) -> int:
 def validate_username(value: str, how_many: int = 1) -> bool:
     if len(value) == 0: # default state - it's fine
         return True
-    if _total_length(value, how_many) > MAX_USERNAME_LENGTH:
+    if _total_length(value, how_many) > auth0.MAX_USERNAME_LENGTH:
         return False
     if ' ' in value:
         return False
@@ -52,8 +51,8 @@ def username_error_message(value: str, how_many: int = 1) -> str:
     if len(value) == 0: # default state - it's fine
         return ""
     total = _total_length(value, how_many)
-    if total > MAX_USERNAME_LENGTH:
-        return f"Final username will be {total} chars (prefix + number suffix). Max is {MAX_USERNAME_LENGTH}."
+    if total > auth0.MAX_USERNAME_LENGTH:
+        return f"Final username will be {total} chars (prefix + number suffix). Max is {auth0.MAX_USERNAME_LENGTH}."
     match = find_all_matches(value)
     if match:
         return f"Usernames can only contain lower-case letters, numbers, and underscores."
