@@ -330,7 +330,7 @@ def search_users(domain, access_token, query: str):
         else:
             print("❌ Error during user search:")
             print(response.status_code, response.text)
-        return data.get('total', 0)
+        return 0
     
     current_page = 0
     total = get_users_page(current_page)
