@@ -278,8 +278,8 @@ def SearchButton(
     )
 
     if users.value is not None and len(users.value) > 0:
-        # solara.Text(f"Searched for username:{prefix.value}\d+ AND email:{prefix.value}*@{email_domain.value}")
-        solara.Text(f"Searched for username:{prefix.value}\d+")
+        # solara.Text(f"Searched for username:{prefix.value}\\d+ AND email:{prefix.value}*@{email_domain.value}")
+        solara.Text(f"Searched for username:{prefix.value}\\d+")
         solara.Markdown(f"<pre>{json.dumps(users.value, indent=4)}</pre>")
 
 
