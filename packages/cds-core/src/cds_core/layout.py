@@ -367,12 +367,11 @@ def BaseLayout(
                 on_v_model=selected_link.set,
             ):
                 for i, route in enumerate(routes_current_level):
-                    disabled = False
+                    disabled = True
+
                     if story_state is not None:
-                        disabled = (
-                            story_state.value.max_route_index is not None
-                            and i > story_state.value.max_route_index
-                        )
+                        max_route_index = story_state.value.max_route_index or 0
+                        disabled = i > max_route_index
 
                     with rv.ListItem(disabled=disabled, inactive=disabled) as list_item:
                         with rv.ListItemIcon(class_="mr-4"):

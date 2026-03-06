@@ -21,4 +21,4 @@ RUN uv sync --package cds-core --package cds-portal --locked --no-dev
 EXPOSE 8865
 
 #CMD ["solara", "run", "cds_portal.pages", "--host=0.0.0.0", "--port=8865", "--no-open", "--production", "--proxy-headers", "--workers", "1"]
-CMD ["uvicorn", "solara.server.starlette:app", "--host", "0.0.0.0", "--port", "8865", "--proxy-headers"]
+CMD ["uvicorn", "solara.server.starlette:app", "--host", "0.0.0.0", "--port", "8865"]
