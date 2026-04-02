@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling==1.26.3"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cds-usergen"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+dependencies = [
+    "solara",
+]
+
+[tool.hatch.version]
+path = "cds_usergen/__init__.py"
+
+
+
+[project.urls]
+Home = "https://www.github.com/widgetti/solara"
+
+[tool.black]
+line-length = 160
+
+[tool.isort]
+profile = "black"

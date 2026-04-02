@@ -2,6 +2,7 @@ import solara
 from solara.alias import rv
 from ...remote import BASE_API
 from datetime import datetime
+from ...components.user_generation import CreateStudentAccountsButton
 
 
 @solara.component
@@ -61,10 +62,12 @@ def RemoveStudentDialog(disabled: bool, on_remove_clicked: callable = None):
 def Page():
     selected_rows = solara.use_reactive([])
     data = solara.use_reactive([])
+    class_data = solara.use_reactive([])
     search = solara.use_reactive("")
 
     def _retrieve_students():
         classes_dict = BASE_API.load_educator_classes()
+        class_data.set(classes_dict["classes"])
         new_data = []
 
         for cls in classes_dict["classes"]:
@@ -121,6 +124,7 @@ def Page():
                     )
                     rv.Divider(vertical=True, class_="ml-4")
                     with rv.ToolbarItems():
+                        CreateStudentAccountsButton(class_data.value)
                         RemoveStudentDialog(
                             disabled=len(selected_rows.value) == 0,
                             on_remove_clicked=_remove_students_from_classes,
