@@ -204,6 +204,7 @@ class BaseAPI:
                 "expected_size": info["expected_size"],
                 "asynchronous": info["asynchronous"],
                 "story_name": info["story_name"],
+                "options": { "pad": info["pad"] },
             },
         )
 
@@ -271,6 +272,19 @@ class BaseAPI:
             json={"active": active},
         )
         return r.json()["success"]
+
+    def get_merged_students_count(self, class_id: int) -> int:
+        r = self.request_session.get(
+            f"{self.API_URL}/hubbles_law/merge-students/{class_id}"
+        )
+        return len(r.json()["students"])
+
+    def pad_class(self, class_id: int, count=12) -> bool:
+        r = self.request_session.put(
+            f"{self.API_URL}/hubbles_law/merge-students",
+            json={"class_id": class_id, "desired_merge_count": count}
+        )
+        return r.status_code == 200
 
     @staticmethod
     def clear_user(state: Reactive[GlobalState]):
