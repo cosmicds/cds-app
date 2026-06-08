@@ -28,10 +28,12 @@ module "app_stack" {
   cds_hubble_max_capacity           = var.cds_hubble_max_capacity
   enable_autoscaling                = var.enable_autoscaling
   enable_cluster_capacity_providers = var.enable_cluster_capacity_providers
+  enable_container_insights         = var.enable_container_insights
   use_capacity_provider_strategy    = var.use_capacity_provider_strategy
   use_private_service_subnets       = var.use_private_service_subnets
   create_private_nat_gateways       = var.create_private_nat_gateways
   log_group_class                   = var.log_group_class
+  app_log_retention_days            = var.app_log_retention_days
   cds_portal_cpu                    = var.cds_portal_cpu
   cds_portal_memory                 = var.cds_portal_memory
   cds_hubble_cpu                    = var.cds_hubble_cpu

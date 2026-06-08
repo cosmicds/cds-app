@@ -64,6 +64,12 @@ variable "enable_cluster_capacity_providers" {
   default     = false
 }
 
+variable "enable_container_insights" {
+  description = "Whether to enable ECS Container Insights for the cluster"
+  type        = bool
+  default     = false
+}
+
 variable "use_capacity_provider_strategy" {
   description = "Whether ECS services should use capacity provider strategy instead of launch_type"
   type        = bool
@@ -86,6 +92,18 @@ variable "log_group_class" {
   description = "CloudWatch log group class to use for application logs"
   type        = string
   default     = "STANDARD"
+}
+
+variable "app_log_retention_days" {
+  description = "Retention in days for application CloudWatch log groups"
+  type        = number
+  default     = 7
+}
+
+variable "cloudfront_origin_protocol_policy" {
+  description = "Protocol policy CloudFront uses when connecting to the ALB origin"
+  type        = string
+  default     = "https-only"
 }
 
 variable "cds_portal_cpu" {
@@ -150,6 +168,12 @@ variable "portal_secret_names" {
   ]
 }
 
+variable "portal_secret_source_arn" {
+  description = "Optional source Secrets Manager ARN used to seed the CDS Portal secret value"
+  type        = string
+  default     = null
+}
+
 variable "hubble_secret_names" {
   description = "Secret keys expected in the CDS Hubble secret"
   type        = list(string)
@@ -169,4 +193,10 @@ variable "hubble_secret_names" {
     "GOOGLE_ANALYTICS_TAG",
     "AWS_EBS_URL",
   ]
+}
+
+variable "hubble_secret_source_arn" {
+  description = "Optional source Secrets Manager ARN used to seed the CDS Hubble secret value"
+  type        = string
+  default     = null
 }

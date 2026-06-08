@@ -16,7 +16,7 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - PYENV_VERSION=3.9.16 aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
       - COMMIT_TAG=$(cat commit_tag.txt)
       - echo "Promoting $ECR_URI:$COMMIT_TAG to $ECR_URI:$IMAGE_TAG"
@@ -30,7 +30,7 @@ phases:
   post_build:
     commands:
       - echo Updating ECS service $ECS_SERVICE_NAME in cluster $ECS_CLUSTER_NAME...
-      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment
+      - PYENV_VERSION=3.9.16 aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment
       - echo Waiting for service to stabilize...
-      - aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --services $ECS_SERVICE_NAME
+      - PYENV_VERSION=3.9.16 aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --services $ECS_SERVICE_NAME
       - echo Deploy complete.

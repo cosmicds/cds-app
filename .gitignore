@@ -22,3 +22,5 @@ wheels/
 **/.terraform-state/
 **/*.tfstate
 **/*.tfstate.*
+**/.infracost
+notebooks/

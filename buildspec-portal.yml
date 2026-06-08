@@ -9,14 +9,14 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - PYENV_VERSION=3.9.16 aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - COMMIT_TAG="commit-$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-8)"
       - ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
 
   build:
     commands:
       - echo Building image $ECR_URI:$COMMIT_TAG
-      - docker build -f Dockerfile.portal -t $ECR_URI:$COMMIT_TAG .
+      - docker build -f docker/cds-portal/Dockerfile -t $ECR_URI:$COMMIT_TAG .
 
   post_build:
     commands:
@@ -28,5 +28,6 @@ phases:
 
 artifacts:
   files:
+    - buildspec-deploy.yml
     - imagedefinitions.json
     - commit_tag.txt

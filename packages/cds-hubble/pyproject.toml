@@ -11,6 +11,7 @@ requires-python = ">=3.13"
 dependencies = [
     "astropy>=7.0.1",
     "authlib>=1.5.2",
+    "cds-client",
     "cds-core",
     "deepdiff>=8.5.0",
     "glue-core>=1.22.0",
@@ -33,4 +34,5 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 ipywwt = { git = "https://github.com/cosmicds/ipywwt.git", rev = "simple" }
+cds-client = { workspace = true }
 cds-core = { workspace = true }

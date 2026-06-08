@@ -28,6 +28,7 @@ module "release_pipeline" {
   approval_notification_arn      = var.approval_notification_arn
   portal_repository_name         = var.portal_repository_name
   hubble_repository_name         = var.hubble_repository_name
+  codebuild_log_retention_days   = var.codebuild_log_retention_days
   staging_portal_url             = var.staging_portal_url
   staging_cluster_name           = var.staging_cluster_name
   staging_portal_service_name    = var.staging_portal_service_name

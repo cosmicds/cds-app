@@ -334,7 +334,7 @@ resource "aws_cloudfront_distribution" "apps" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "https-only"
+      origin_protocol_policy = var.cloudfront_origin_protocol_policy
       origin_ssl_protocols   = ["TLSv1.2"]
 
       origin_keepalive_timeout = 60
@@ -430,7 +430,7 @@ resource "aws_ecs_cluster" "main" {
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = var.enable_container_insights ? "enabled" : "disabled"
   }
 
   tags = {
@@ -475,6 +475,28 @@ resource "aws_secretsmanager_secret" "cds_hubble_secrets" {
     Name        = "${var.environment}-cds-hubble-secrets"
     Environment = var.environment
   }
+}
+
+data "aws_secretsmanager_secret_version" "portal_source" {
+  count     = var.portal_secret_source_arn != null ? 1 : 0
+  secret_id = var.portal_secret_source_arn
+}
+
+data "aws_secretsmanager_secret_version" "hubble_source" {
+  count     = var.hubble_secret_source_arn != null ? 1 : 0
+  secret_id = var.hubble_secret_source_arn
+}
+
+resource "aws_secretsmanager_secret_version" "cds_portal_seed" {
+  count         = var.portal_secret_source_arn != null ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.cds_portal_secrets.id
+  secret_string = data.aws_secretsmanager_secret_version.portal_source[0].secret_string
+}
+
+resource "aws_secretsmanager_secret_version" "cds_hubble_seed" {
+  count         = var.hubble_secret_source_arn != null ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.cds_hubble_secrets.id
+  secret_string = data.aws_secretsmanager_secret_version.hubble_source[0].secret_string
 }
 
 resource "aws_ssm_parameter" "cds_portal_env_vars" {
@@ -566,7 +588,7 @@ resource "aws_iam_role_policy" "ecs_secrets_policy" {
 
 resource "aws_cloudwatch_log_group" "cds_portal" {
   name              = "/ecs/${var.environment}-cds-portal"
-  retention_in_days = 7
+  retention_in_days = var.app_log_retention_days
   log_group_class   = var.log_group_class
 
   tags = {
@@ -577,7 +599,7 @@ resource "aws_cloudwatch_log_group" "cds_portal" {
 
 resource "aws_cloudwatch_log_group" "cds_hubble" {
   name              = "/ecs/${var.environment}-cds-hubble"
-  retention_in_days = 7
+  retention_in_days = var.app_log_retention_days
   log_group_class   = var.log_group_class
 
   tags = {

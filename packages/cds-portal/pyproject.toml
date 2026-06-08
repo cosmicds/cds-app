@@ -10,6 +10,8 @@ requires-python = ">=3.13"
 dependencies = [
     "astropy>=7.0.1",
     "authlib>=1.5.2",
+    "cds-client",
+    "cds-core",
     "cds-dashboard",
     "httpx>=0.28.1",
     "itsdangerous>=2.2.0",
@@ -26,5 +28,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-cds-dashboard = { workspace = true }
+cds-client = { workspace = true }
 cds-core = { workspace = true }
+cds-dashboard = { workspace = true }
+solara-state = { git = "https://github.com/nmearl/solara-state.git"}
+unique-namer = { git = "https://github.com/cosmicds/unique-namer"}
