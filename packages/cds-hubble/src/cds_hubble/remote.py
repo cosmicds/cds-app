@@ -338,10 +338,12 @@ class LocalAPI(BaseAPI):
         student_ids: Optional[List[int]] = None,
     ) -> list[StudentMeasurement]:
 
+        class_id = global_state.value.classroom.class_info["id"]
         url = (
             f"{self.API_URL}/{local_state.value.story_id}/class-measurements/"
-            f"{global_state.value.student.id}/{global_state.value.classroom.class_info['id']}"
-            f"?complete_only=true"
+            f"{global_state.value.student.id}"
+            f"/{class_id}" if class_id is not None else ""
+            "?complete_only=true"
         )
         if student_ids:
             url += f"&student_ids={''.join([str(x) for x in student_ids])}"
