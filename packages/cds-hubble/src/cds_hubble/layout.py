@@ -96,6 +96,14 @@ def Layout(
 
     solara.use_memo(_state_setup, dependencies=[])
 
+    if FORCE_DEMO: 
+        add_body_class = """
+            (function() {
+                document.body.classList.add("demo");
+            })();
+        """
+        solara.HTML(tag="script", unsafe_innerHTML=add_body_class) 
+
     initial_state_written = solara.use_reactive(False)
 
     def _consume_write_state():

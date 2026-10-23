@@ -52,6 +52,28 @@
 
 }
 
+.demo .cosmicds-appbar > div.v-toolbar__content > [tag=h3]::after {
+    content: "Shortened DEMO Version:\AProgress and measurements are NOT saved";
+    white-space: pre-wrap;
+    display: block;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: white;
+    background-color: red;
+  
+    /* position: absolute;
+    top: 100%;
+    left: 0%; */
+  
+    padding-inline: 15px;
+    padding-block: 5px;
+    border-radius: 10px;
+    margin-left: 25px;  
+    
+    line-height: 1.2;
+}
+
 h2 {
     font-size: 1.5rem;
     font-weight: 500;
