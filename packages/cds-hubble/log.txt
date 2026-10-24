@@ -1,0 +1,143 @@
+New version of Solara available: 1.51.1. You have 1.51.0. Please upgrade using:
+	$ pip install "solara==1.51.1"
+Solara server is starting at http://localhost:8865
+[2025-09-02 12:34:45][    INFO][   STATE][base_states.py:26]:Debug mode is disabled. 
+/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/solara/validate_hooks.py:122: UserWarning: /Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/components/spectrum_viewer/spectrum_viewer.py:139: SpectrumViewer: `use_effect` found despite early return on line 68
+To suppress this check, replace the line with:
+    solara.use_effect(_on_reset_button_clicked, dependencies=[galaxy_data])  # noqa: SH101
+
+Make sure you understand the consequences of this, by reading about the rules of hooks at:
+    https://solara.dev/documentation/advanced/understanding/rules-of-hooks
+
+  warnings.warn(str(e))
+/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/solara/validate_hooks.py:122: UserWarning: /Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/stages/p04_explore_data/__init__.py:288: Page: `use_memo` found despite early return on line 267
+To suppress this check, replace the line with:
+    solara.use_memo(_state_callback_setup, dependencies=[])  # noqa: SH101
+
+Make sure you understand the consequences of this, by reading about the rules of hooks at:
+    https://solara.dev/documentation/advanced/understanding/rules-of-hooks
+
+  warnings.warn(str(e))
+/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/solara/validate_hooks.py:122: UserWarning: /Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/stages/p05_class_results/__init__.py:495: Page: `use_memo` found despite early return on line 433
+To suppress this check, replace the line with:
+    solara.use_memo(_state_callback_setup, dependencies=[])  # noqa: SH101
+
+Make sure you understand the consequences of this, by reading about the rules of hooks at:
+    https://solara.dev/documentation/advanced/understanding/rules-of-hooks
+
+  warnings.warn(str(e))
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:48]:Loaded custom vue files.
+[2025-09-02 12:34:48][   DEBUG][  LAYOUT][layout.py:101]:User is authenticated.
+[2025-09-02 12:34:48][    INFO][     API][remote.py:84]:Loaded user info for user `5228`.
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:90]:Student ID: 5228
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:29]:Clearing local states.
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:39]:Student ID: 5228
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:41]:Loading story stage and measurements for user `5228`.
+[2025-09-02 12:34:48][    INFO][     API][remote.py:214]:Story JSON
+[2025-09-02 12:34:48][    INFO][     API][remote.py:215]:{'app': {'story_state': {'stage_states': {'spectra_&_velocity': {'max_step': 3, 'progress': 0.08823529411764706, 'current_step': {'name': 'sel_gal2', 'value': 3}}}, 'max_route_index': 1}}}
+[2025-09-02 12:34:48][ WARNING][   STATE][base_states.py:314]:No 'type' field found in story state data.
+[2025-09-02 12:34:48][    INFO][     API][remote.py:242]:Updated state from database.
+[2025-09-02 12:34:48][    INFO][     API][remote.py:244]:story_state=StoryState(type='hubbles_law', debug_mode=False, title="Hubble's Law", story_id='hubbles_law', piggybank_total=0, max_route_index=None, stage_states={'introduction': StageState(type='introduction', current_step=<Marker.int_sli1: 1>, stage_id='introduction', free_responses={}, multiple_choice_responses={}, intro_slideshow_state=IntroSlideshow(step=0, max_step_completed=0), max_step=0, total_steps=8, progress=0.125), 'spectra_&_velocity': StageState(type='spectra_&_velocity', current_step=<Marker.mee_gui1: 1>, stage_id='spectra_&_velocity', free_responses={}, multiple_choice_responses={}, show_example_galaxy=False, selected_galaxy=0, selected_galaxies=[], galaxy_is_selected=False, selected_example_galaxy=0, total_galaxies=0, spectrum_tutorial_opened=False, rest_wave_tool_activated=False, obs_wave_tool_used=False, spectrum_clicked=False, zoom_tool_activated=False, zoom_tool_active=False, doppler_calc_reached=False, obs_wave=0, show_doppler_dialog=False, doppler_state=DopplerCalculation(step=0, length=6, current_title='', validation_4_failed=False, validation_5_failed=False, interact_steps_5=[3, 4], max_step_completed_5=0, student_c=0, velocity_calculated=False, completed=False), show_dotplot_tutorial_dialog=False, dotplot_tutorial_state=DotPlotTutorial(step=0, length=4, max_step_completed=0, current_title=''), dotplot_tutorial_finished=False, dotplot_click_count=0, has_bad_velocities=False, has_multiple_bad_velocities=False, obs_wave_total=0, velocities_total=0, show_reflection_dialog=False, velocity_reflection_state=VelocityReflection(step=0, max_step_completed=0), reflection_complete=False, show_dop_cal4_values=False, wwt_ready=False, max_step=1, total_steps=34, progress=0.029411764705882353), 'distance_introduction': StageState(type='distance_introduction', current_step=<Marker.mea_dis1: 1>, stage_id='distance_introduction', free_responses={}, multiple_choice_responses={}, distance_slideshow_state=DistanceSlideshow(step=0, max_step_completed=0), max_step=1, total_steps=13, progress=0.07692307692307693), 'distance_measurements': StageState(type='distance_measurements', current_step=<Marker.ang_siz1: 1>, stage_id='distance_measurements', free_responses={}, multiple_choice_responses={}, example_angular_sizes_total=0, angular_sizes_total=0, dosdonts_tutorial_opened=False, selected_galaxy={}, selected_example_galaxy={}, show_ruler=False, meas_theta=0.0, ruler_click_count=0, n_meas=0, bad_measurement=False, distances_total=0, fill_est_dist_values=False, show_dotplot_lines=True, angular_size_line=None, distance_line=None, wwt_ready=False, max_step=1, total_steps=23, progress=0.043478260869565216), 'explore_data': StageState(type='explore_data', current_step=<Marker.wwt_wait: 1>, stage_id='explore_data', free_responses={}, multiple_choice_responses={}, show_hubble_slideshow_dialog=False, hubble_slideshow_finished=False, hubble_slideshow_state=HubbleSlideshow(step=0, max_step_completed=0), draw_click_count=0, best_fit_click_count=0, best_fit_gal_vel=100, best_fit_gal_dist=8000, class_data_displayed=False, max_step=1, total_steps=19, progress=0.05263157894736842), 'class_results_and_uncertainty': StageState(type='class_results_and_uncertainty', current_step=<Marker.ran_var1: 1>, stage_id='class_results_and_uncertainty', free_responses={}, multiple_choice_responses={}, student_low_age=0, student_high_age=0, class_low_age=0, class_high_age=0, class_data_size=0, uncertainty_state=UncertaintyState(step=0, max_step_completed=0), uncertainty_slideshow_finished=False, class_best_fit_clicked=False, histogram_range_answered=False, histogram_percent_range_answered=False, histogram_distribution_answered=False, max_step=1, total_steps=31, progress=0.03225806451612903), 'professional_data': StageState(type='professional_data', current_step=<Marker.pro_dat0: 1>, stage_id='professional_data', free_responses={}, multiple_choice_responses={}, our_age=0, class_age=0, ages_within=0.15, allow_too_close_correct=True, fit_line_shown=False, max_step=1, total_steps=12, progress=0.08333333333333333)}, measurements=[], example_measurements=[], class_measurements=[], all_measurements=[], student_summaries=[], class_summaries=[], measurements_loaded=False, calculations={}, validation_failure_counts={}, has_best_fit_galaxy=False, best_fit_slope=None, enough_students_ready=False, class_data_students=[], class_data_info={}, show_snackbar=False, snackbar_message='', stage_4_class_data_students=[], stage_5_class_data_students=[], last_route=None, route_restored=False, mc_scoring={'scores': {}}, free_responses={'responses': {}}) drawer=True speed_menu=False loading_status_message='' student=Student(id=None) classroom=Classroom(class_info={}, size=0) update_db=True show_team_interface=True allow_advancing=True speech=Speech(pitch=1.0, rate=1.0, autoread=False, voice=None) educator=False
+[2025-09-02 12:34:48][    INFO][     API][remote.py:245]:type='hubbles_law' debug_mode=False title="Hubble's Law" story_id='hubbles_law' piggybank_total=0 max_route_index=None stage_states={'introduction': StageState(type='introduction', current_step=<Marker.int_sli1: 1>, stage_id='introduction', free_responses={}, multiple_choice_responses={}, intro_slideshow_state=IntroSlideshow(step=0, max_step_completed=0), max_step=0, total_steps=8, progress=0.125), 'spectra_&_velocity': StageState(type='spectra_&_velocity', current_step=<Marker.mee_gui1: 1>, stage_id='spectra_&_velocity', free_responses={}, multiple_choice_responses={}, show_example_galaxy=False, selected_galaxy=0, selected_galaxies=[], galaxy_is_selected=False, selected_example_galaxy=0, total_galaxies=0, spectrum_tutorial_opened=False, rest_wave_tool_activated=False, obs_wave_tool_used=False, spectrum_clicked=False, zoom_tool_activated=False, zoom_tool_active=False, doppler_calc_reached=False, obs_wave=0, show_doppler_dialog=False, doppler_state=DopplerCalculation(step=0, length=6, current_title='', validation_4_failed=False, validation_5_failed=False, interact_steps_5=[3, 4], max_step_completed_5=0, student_c=0, velocity_calculated=False, completed=False), show_dotplot_tutorial_dialog=False, dotplot_tutorial_state=DotPlotTutorial(step=0, length=4, max_step_completed=0, current_title=''), dotplot_tutorial_finished=False, dotplot_click_count=0, has_bad_velocities=False, has_multiple_bad_velocities=False, obs_wave_total=0, velocities_total=0, show_reflection_dialog=False, velocity_reflection_state=VelocityReflection(step=0, max_step_completed=0), reflection_complete=False, show_dop_cal4_values=False, wwt_ready=False, max_step=1, total_steps=34, progress=0.029411764705882353), 'distance_introduction': StageState(type='distance_introduction', current_step=<Marker.mea_dis1: 1>, stage_id='distance_introduction', free_responses={}, multiple_choice_responses={}, distance_slideshow_state=DistanceSlideshow(step=0, max_step_completed=0), max_step=1, total_steps=13, progress=0.07692307692307693), 'distance_measurements': StageState(type='distance_measurements', current_step=<Marker.ang_siz1: 1>, stage_id='distance_measurements', free_responses={}, multiple_choice_responses={}, example_angular_sizes_total=0, angular_sizes_total=0, dosdonts_tutorial_opened=False, selected_galaxy={}, selected_example_galaxy={}, show_ruler=False, meas_theta=0.0, ruler_click_count=0, n_meas=0, bad_measurement=False, distances_total=0, fill_est_dist_values=False, show_dotplot_lines=True, angular_size_line=None, distance_line=None, wwt_ready=False, max_step=1, total_steps=23, progress=0.043478260869565216), 'explore_data': StageState(type='explore_data', current_step=<Marker.wwt_wait: 1>, stage_id='explore_data', free_responses={}, multiple_choice_responses={}, show_hubble_slideshow_dialog=False, hubble_slideshow_finished=False, hubble_slideshow_state=HubbleSlideshow(step=0, max_step_completed=0), draw_click_count=0, best_fit_click_count=0, best_fit_gal_vel=100, best_fit_gal_dist=8000, class_data_displayed=False, max_step=1, total_steps=19, progress=0.05263157894736842), 'class_results_and_uncertainty': StageState(type='class_results_and_uncertainty', current_step=<Marker.ran_var1: 1>, stage_id='class_results_and_uncertainty', free_responses={}, multiple_choice_responses={}, student_low_age=0, student_high_age=0, class_low_age=0, class_high_age=0, class_data_size=0, uncertainty_state=UncertaintyState(step=0, max_step_completed=0), uncertainty_slideshow_finished=False, class_best_fit_clicked=False, histogram_range_answered=False, histogram_percent_range_answered=False, histogram_distribution_answered=False, max_step=1, total_steps=31, progress=0.03225806451612903), 'professional_data': StageState(type='professional_data', current_step=<Marker.pro_dat0: 1>, stage_id='professional_data', free_responses={}, multiple_choice_responses={}, our_age=0, class_age=0, ages_within=0.15, allow_too_close_correct=True, fit_line_shown=False, max_step=1, total_steps=12, progress=0.08333333333333333)} measurements=[] example_measurements=[] class_measurements=[] all_measurements=[] student_summaries=[] class_summaries=[] measurements_loaded=False calculations={} validation_failure_counts={} has_best_fit_galaxy=False best_fit_slope=None enough_students_ready=False class_data_students=[] class_data_info={} show_snackbar=False snackbar_message='' stage_4_class_data_students=[] stage_5_class_data_students=[] last_route=None route_restored=False mc_scoring={'scores': {}} free_responses={'responses': {}}
+[2025-09-02 12:34:48][    INFO][  LAYOUT][layout.py:49]:type='hubbles_law' debug_mode=False title="Hubble's Law" story_id='hubbles_law' piggybank_total=0 max_route_index=None stage_states={'introduction': StageState(type='introduction', current_step=<Marker.int_sli1: 1>, stage_id='introduction', free_responses={}, multiple_choice_responses={}, intro_slideshow_state=IntroSlideshow(step=0, max_step_completed=0), max_step=0, total_steps=8, progress=0.125), 'spectra_&_velocity': StageState(type='spectra_&_velocity', current_step=<Marker.mee_gui1: 1>, stage_id='spectra_&_velocity', free_responses={}, multiple_choice_responses={}, show_example_galaxy=False, selected_galaxy=0, selected_galaxies=[], galaxy_is_selected=False, selected_example_galaxy=0, total_galaxies=0, spectrum_tutorial_opened=False, rest_wave_tool_activated=False, obs_wave_tool_used=False, spectrum_clicked=False, zoom_tool_activated=False, zoom_tool_active=False, doppler_calc_reached=False, obs_wave=0, show_doppler_dialog=False, doppler_state=DopplerCalculation(step=0, length=6, current_title='', validation_4_failed=False, validation_5_failed=False, interact_steps_5=[3, 4], max_step_completed_5=0, student_c=0, velocity_calculated=False, completed=False), show_dotplot_tutorial_dialog=False, dotplot_tutorial_state=DotPlotTutorial(step=0, length=4, max_step_completed=0, current_title=''), dotplot_tutorial_finished=False, dotplot_click_count=0, has_bad_velocities=False, has_multiple_bad_velocities=False, obs_wave_total=0, velocities_total=0, show_reflection_dialog=False, velocity_reflection_state=VelocityReflection(step=0, max_step_completed=0), reflection_complete=False, show_dop_cal4_values=False, wwt_ready=False, max_step=1, total_steps=34, progress=0.029411764705882353), 'distance_introduction': StageState(type='distance_introduction', current_step=<Marker.mea_dis1: 1>, stage_id='distance_introduction', free_responses={}, multiple_choice_responses={}, distance_slideshow_state=DistanceSlideshow(step=0, max_step_completed=0), max_step=1, total_steps=13, progress=0.07692307692307693), 'distance_measurements': StageState(type='distance_measurements', current_step=<Marker.ang_siz1: 1>, stage_id='distance_measurements', free_responses={}, multiple_choice_responses={}, example_angular_sizes_total=0, angular_sizes_total=0, dosdonts_tutorial_opened=False, selected_galaxy={}, selected_example_galaxy={}, show_ruler=False, meas_theta=0.0, ruler_click_count=0, n_meas=0, bad_measurement=False, distances_total=0, fill_est_dist_values=False, show_dotplot_lines=True, angular_size_line=None, distance_line=None, wwt_ready=False, max_step=1, total_steps=23, progress=0.043478260869565216), 'explore_data': StageState(type='explore_data', current_step=<Marker.wwt_wait: 1>, stage_id='explore_data', free_responses={}, multiple_choice_responses={}, show_hubble_slideshow_dialog=False, hubble_slideshow_finished=False, hubble_slideshow_state=HubbleSlideshow(step=0, max_step_completed=0), draw_click_count=0, best_fit_click_count=0, best_fit_gal_vel=100, best_fit_gal_dist=8000, class_data_displayed=False, max_step=1, total_steps=19, progress=0.05263157894736842), 'class_results_and_uncertainty': StageState(type='class_results_and_uncertainty', current_step=<Marker.ran_var1: 1>, stage_id='class_results_and_uncertainty', free_responses={}, multiple_choice_responses={}, student_low_age=0, student_high_age=0, class_low_age=0, class_high_age=0, class_data_size=0, uncertainty_state=UncertaintyState(step=0, max_step_completed=0), uncertainty_slideshow_finished=False, class_best_fit_clicked=False, histogram_range_answered=False, histogram_percent_range_answered=False, histogram_distribution_answered=False, max_step=1, total_steps=31, progress=0.03225806451612903), 'professional_data': StageState(type='professional_data', current_step=<Marker.pro_dat0: 1>, stage_id='professional_data', free_responses={}, multiple_choice_responses={}, our_age=0, class_age=0, ages_within=0.15, allow_too_close_correct=True, fit_line_shown=False, max_step=1, total_steps=12, progress=0.08333333333333333)} measurements=[] example_measurements=[] class_measurements=[] all_measurements=[] student_summaries=[] class_summaries=[] measurements_loaded=False calculations={} validation_failure_counts={} has_best_fit_galaxy=False best_fit_slope=None enough_students_ready=False class_data_students=[] class_data_info={} show_snackbar=False snackbar_message='' stage_4_class_data_students=[] stage_5_class_data_students=[] last_route=None route_restored=False mc_scoring={'scores': {}} free_responses={'responses': {}}
+ERROR:    Component react.component(cds_hubble.routes.<lambda>) raised exception ConnectionError(ProtocolError('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')))
+Traceback (most recent call last):
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/util/retry.py", line 474, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/util/util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/urllib3/connection.py", line 516, in getresponse
+    httplib_response = super().getresponse()
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/Users/jon/.local/share/uv/python/cpython-3.13.3-macos-aarch64-none/lib/python3.13/http/client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+urllib3.exceptions.ProtocolError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/reacton/core.py", line 1702, in _render
+    root_element = el.component.f(*el.args, **el.kwargs)
+  File "/Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/routes.py", line 19, in <lambda>
+    lambda *args, **kwargs: Layout(
+                            ~~~~~~^
+        *args, **kwargs, local_state=LOCAL_STATE, global_state=APP_STATE
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/layout.py", line 93, in Layout
+    solara.use_memo(lambda: _load_state(global_state, local_state), dependencies=[])
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/reacton/core.py", line 874, in use_memo
+    return rc.use_memo(f, dependencies, debug_name)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/reacton/core.py", line 1239, in use_memo
+    value = f()
+  File "/Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/layout.py", line 93, in <lambda>
+    solara.use_memo(lambda: _load_state(global_state, local_state), dependencies=[])
+                            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/layout.py", line 52, in _load_state
+    measurements = LOCAL_API.get_measurements(global_state, local_state)
+  File "/Users/jon/dev/CosmicDS/cds-app/packages/cds-hubble/src/cds_hubble/remote.py", line 113, in get_measurements
+    r = self.request_session.get(url)
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/requests/sessions.py", line 602, in get
+    return self.request("GET", url, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/jon/dev/CosmicDS/cds-app/.venv/lib/python3.13/site-packages/requests/adapters.py", line 682, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+Aborted.

@@ -102,7 +102,7 @@ def Layout(
                 document.body.classList.add("demo");
             })();
         """
-        solara.HTML(tag="script", unsafe_innerHTML=add_body_class) 
+        solara.HTML(tag="script", unsafe_innerHTML=add_body_class, classes=["demo-script"]) 
 
     initial_state_written = solara.use_reactive(False)
 
