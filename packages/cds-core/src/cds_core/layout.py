@@ -300,6 +300,7 @@ def BaseLayout(
                         flat=True,
                         tile=True,
                         style_="padding-right: 1px;",
+                        class_="student-info-panels",
                         children=[
                             rv.ExpansionPanel(
                                 class_="pa-0 ma-0",

@@ -79,6 +79,10 @@ header.cosmicds-appbar > div.v-toolbar__content > [tag=h2] {
     line-height: 1.2;
 }
 
+.demo .student-info-panels {
+  display: none;
+}
+
 h2 {
     font-size: 1.5rem;
     font-weight: 500;
