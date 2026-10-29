@@ -40,6 +40,12 @@ variable "hubble_repository_name" {
   default     = "cds-hubble"
 }
 
+variable "codebuild_log_retention_days" {
+  description = "Retention in days for delivery CodeBuild CloudWatch log groups"
+  type        = number
+  default     = 7
+}
+
 variable "staging_portal_url" {
   description = "Staging URL shown in the approval stage"
   type        = string

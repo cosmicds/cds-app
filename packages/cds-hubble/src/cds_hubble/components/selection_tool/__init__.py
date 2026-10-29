@@ -223,6 +223,13 @@ def SelectionTool(
         """
         Show or hide the galaxies on the WWT widget.
         """
+        # WWT must be ready before we can add layers or navigate.
+        # If the page is refreshed while show_galaxies is already True, this
+        # effect fires on mount before WWT has loaded.  We return early and
+        # rely on show_wwt changing to True to re-trigger the effect.
+        if not show_wwt.value:
+            return
+
         wwt_widget = solara.get_widget(wwt_container).children[0]
 
         if current_layer.value is None:
@@ -253,7 +260,7 @@ def SelectionTool(
                 wwt_widget, coords=START_COORDINATES, fov=60 * u.deg, instant=True
             )
 
-    solara.use_effect(_on_show_galaxies, dependencies=[show_galaxies])
+    solara.use_effect(_on_show_galaxies, dependencies=[show_galaxies, show_wwt.value])
 
     def _go_to_location(
         wwt_widget: HubbleWWTWidget,

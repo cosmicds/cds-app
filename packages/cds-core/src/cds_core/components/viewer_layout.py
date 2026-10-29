@@ -1,5 +1,4 @@
 from ..utils import make_figure_autoresize, DEFAULT_VIEWER_HEIGHT
-from glue_plotly.viewers.common.viewer import PlotlyBaseView
 import solara
 import reacton.ipyvuetify as rv
 
@@ -41,6 +40,7 @@ def ToolBar(viewer):
 
 @solara.component
 def ViewerLayout(viewer, viewer_height=DEFAULT_VIEWER_HEIGHT):
+    from glue_plotly.viewers.common.viewer import PlotlyBaseView
     if isinstance(viewer, PlotlyBaseView):
         make_figure_autoresize(viewer.figure_widget, viewer_height)
     # viewer.figure_widget.layout.height = 600

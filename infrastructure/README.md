@@ -2,9 +2,16 @@
 
 This directory now uses isolated Terraform roots per environment:
 
+- `environments/demo`
 - `environments/staging`
 - `environments/production`
 - `environments/delivery`
+
+`demo` is a standalone, Hubble-only deployment. It has its own VPC, ALB,
+CloudFront distribution, ECS cluster, ECR repository, build pipeline, secret,
+and Terraform state. It does not depend on the full production or staging
+stacks. The default configuration runs one 0.5-vCPU/1-GB Fargate task with no
+autoscaling, NAT gateways, portal service, or Container Insights.
 
 `staging` and `production` each provision a separate application stack from
 `modules/app_stack`, so Terraform state and infrastructure are isolated.
@@ -22,16 +29,49 @@ Run Terraform from the specific environment directory:
 ```sh
 cd infrastructure/environments/staging
 terraform init
-cp terraform.tfvars.example terraform.tfvars
 terraform plan
 ```
 
-Repeat the same pattern for `production` and `delivery`.
+Review the checked-in `terraform.tfvars` for the selected root before planning.
+Repeat the same pattern for `demo`, `production`, and `delivery`.
 
-## Migration Notes
+## Demo Bootstrap
 
-- The old top-level Terraform root was removed as the active entry point.
-- Existing local state files in `infrastructure/` were left in place as
-  historical artifacts and should not be used for future applies.
-- Before applying `delivery`, fill in the real ECS cluster and service names
-  from the `staging` and `production` outputs.
+The demo task reads the same Hubble secret keys as staging and production,
+plus `CDS_FORCE_DEMO` and `CDS_DISABLE_DB`, from the independent
+`demo/cds-hubble/secrets` Secrets Manager secret. Terraform creates the secret
+container but deliberately does not manage its value. Bootstrap it before the
+full deployment:
+
+```sh
+cd infrastructure/environments/demo
+terraform init
+terraform apply -target=aws_secretsmanager_secret.hubble
+```
+
+Copy the JSON value from `production/cds-hubble/secrets` into the demo secret,
+then add these entries:
+
+```json
+{
+  "CDS_FORCE_DEMO": "true",
+  "CDS_DISABLE_DB": "true"
+}
+```
+
+Every mapped key must exist in the demo secret or ECS will reject the task at
+startup. Before deploying, update environment-specific values such as
+`SOLARA_ROOT_PATH`, `SOLARA_BASE_URL`, and `AWS_EBS_URL` for the root-mounted
+demo and its initial CloudFront hostname.
+
+Then run `terraform plan` and `terraform apply` from the same directory. The
+new CodeStar connection must be authorized in the AWS console before the demo
+pipeline can access GitHub. Start the pipeline once to create the initial
+`cds-hubble-demo:latest` image; the ECS service will not stabilize until that
+image exists.
+
+The demo initially uses its generated CloudFront hostname because a hostname
+can only be attached to one CloudFront distribution at a time. After the old
+production distribution is retired, set `site_domain_name` to
+`app.cosmicds.cfa.harvard.edu`, set `certificate_domain` to the matching issued
+ACM certificate domain, apply again, and point DNS at the demo distribution.

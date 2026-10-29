@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..utils import vertical_line_mark
 
 from itertools import chain
@@ -9,10 +11,12 @@ from uuid import uuid4
 
 from glue.core import Data
 from glue.viewers.common.viewer import Viewer
-from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from plotly.graph_objects import Scatter
 from numbers import Number
-from typing import Callable, Iterable, List, Optional
+from typing import TYPE_CHECKING, Callable, Iterable, List, Optional
+
+if TYPE_CHECKING:
+    from glue_plotly.viewers.common.viewer import PlotlyBaseView
 
 from ..utils import line_mark, mode, CDS_IMAGE_BASE_URL
 

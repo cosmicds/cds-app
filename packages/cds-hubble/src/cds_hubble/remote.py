@@ -116,11 +116,16 @@ class LocalAPI(BaseAPI):
         if r.status_code == 200:
             measurement_json = r.json()
 
-            parsed_measurements = []
+            # Build a lookup so each measurement can be re-joined with its
+            # full GalaxyData (the API only returns galaxy_id, not the object).
+            galaxy_lookup = {g.id: g for g in self.get_galaxies(local_state)}
 
-            for measurement in measurement_json["measurements"]:
-                measurement = StudentMeasurement(**measurement)
-                parsed_measurements.append(measurement)
+            parsed_measurements = []
+            for meas in measurement_json["measurements"]:
+                galaxy = galaxy_lookup.get(meas.get("galaxy_id"))
+                if galaxy is not None:
+                    meas = {**meas, "galaxy": galaxy}
+                parsed_measurements.append(StudentMeasurement(**meas))
 
             measurements.set(parsed_measurements)
 
@@ -146,40 +151,47 @@ class LocalAPI(BaseAPI):
 
             sample_measurement_json = r.json()
 
+        sample_gal_data = LOCAL_API.get_sample_galaxy(local_state)
+        galaxy_lookup = {g.id: g for g in self.get_galaxies(local_state)}
+        galaxy_lookup[sample_gal_data.id] = sample_gal_data
+
         if len(sample_measurement_json["measurements"]) == 0:
             logger.info(
                 "Failed to find sample galaxies for user `%s`: creating new "
                 "sample measurement.",
                 global_state.value.student.id,
             )
-            sample_gal_data = LOCAL_API.get_sample_galaxy(local_state)
-            for meas in ["first", "second"]:
+            for meas_number in ["first", "second"]:
                 sample_measurement_json["measurements"].append(
                     StudentMeasurement(
                         student_id=global_state.value.student.id,
                         galaxy=sample_gal_data,
-                        measurement_number=meas,
-                    ).dict()
+                        measurement_number=meas_number,
+                    ).model_dump()
                 )
         elif len(sample_measurement_json["measurements"]) == 1:
             logger.info(
-                "Example measurements only had the first. Creating missing second measurement"
+                "Example measurements only had the first. Creating missing second measurement."
             )
-            sample_gal_data = LOCAL_API.get_sample_galaxy(local_state)
             sample_measurement_json["measurements"].append(
                 StudentMeasurement(
                     student_id=global_state.value.student.id,
                     galaxy=sample_gal_data,
                     measurement_number="second",
-                ).dict()
+                ).model_dump()
             )
 
         sample_measurements = Ref(local_state.fields.example_measurements)
         parsed_sample_measurements = []
 
-        for measurement in sample_measurement_json["measurements"]:
-            measurement = StudentMeasurement(**measurement)
-            parsed_sample_measurements.append(measurement)
+        for meas in sample_measurement_json["measurements"]:
+            galaxy_id = meas.get("galaxy_id") or (
+                meas.get("galaxy", {}).get("id") if isinstance(meas.get("galaxy"), dict) else None
+            )
+            galaxy = galaxy_lookup.get(galaxy_id)
+            if galaxy is not None:
+                meas = {**meas, "galaxy": galaxy}
+            parsed_sample_measurements.append(StudentMeasurement(**meas))
 
         sample_measurements.set(parsed_sample_measurements)
 
@@ -200,13 +212,17 @@ class LocalAPI(BaseAPI):
         url = f"{self.API_URL}/{local_state.value.story_id}/submit-measurement/"
 
         for measurement in local_state.value.measurements:
-            r = self.request_session.put(url, json=measurement.dict(exclude={"galaxy"}))
+            payload = measurement.model_dump(
+                exclude={"galaxy", "class_id", "measurement_number"},
+                exclude_none=True,
+            )
+            r = self.request_session.put(url, json=payload)
 
             if r.status_code != 200:
                 logger.warning(
-                    f"Failed to add measurement for galaxy `%s` by student `%s`.",
-                    global_state.value.student.id,
+                    "Failed to add measurement for galaxy `%s` by student `%s`.",
                     measurement.galaxy_id,
+                    global_state.value.student.id,
                 )
 
         logger.info(
@@ -227,19 +243,24 @@ class LocalAPI(BaseAPI):
         for i, measurement in enumerate(local_state.value.example_measurements):
             if i == 0:
                 logger.info(
-                    f"Adding example measurement for galaxy `%s` by student `%s`.",
+                    "Adding example measurement for galaxy `%s` by student `%s`.",
                     measurement.galaxy_id,
                     global_state.value.student.id,
                 )
 
-            r = self.request_session.put(url, json=measurement.dict(exclude={"galaxy"}))
+            payload = measurement.model_dump(
+                exclude={"galaxy", "class_id"},
+                exclude_none=True,
+            )
+            r = self.request_session.put(url, json=payload)
 
             if r.status_code != 200:
                 logger.warning(
-                    f"Failed to add example measurement for galaxy `%s` by student `%s`.",
+                    "Failed to add example measurement for galaxy `%s` by student `%s`.",
                     measurement.galaxy_id,
                     global_state.value.student.id,
                 )
+                print(r.text)
 
             logger.info(
                 "Stored example measurements for student %s.",

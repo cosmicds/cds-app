@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import Counter
 from datetime import datetime
 import json
@@ -5,10 +7,13 @@ from numbers import Number
 import os
 from math import log10
 from types import UnionType
+from typing import TYPE_CHECKING
 from glue.core import Component, ComponentID, Data, DataCollection
 from glue.core.roi import CategoricalComponent
-from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from glue_plotly.viewers.common.viewer import PlotlyBaseView
 from pydantic.fields import FieldInfo
 from requests import adapters
 import random

@@ -4,8 +4,10 @@ import solara
 import os
 from solara import Reactive
 from solara.lab import Ref
+from solara.lab import cookies as solara_cookies
 from solara_enterprise import auth
 
+from cds_client.cookies import verify_student_cookie
 from cds_core.app_state import AppState
 from cds_core.layout import BaseLayout, BaseSetup
 from cds_core.logger import setup_logger
@@ -80,6 +82,25 @@ def Layout(
     app_state: Reactive[AppState] = None,
     story_state: Reactive[StoryState] = None,
 ):
+    all_cookies = solara_cookies.use_value()
+
+    def _ensure_student_auth():
+        """Inject a synthetic auth.user from the student session cookie.
+
+        Must run before BaseSetup so that _initial_setup sees an authenticated user.
+        """
+        if auth.user.value is not None:
+            return
+        cookie_val = all_cookies.get("cds_student", "")
+        if not cookie_val:
+            return
+        username = verify_student_cookie(cookie_val)
+        if username is None:
+            return
+        auth.user.set({"userinfo": {"cds/student_username": username, "cds/name": username}})
+
+    solara.use_memo(_ensure_student_auth, dependencies=[all_cookies])
+
     BaseSetup(
         remote_api=LOCAL_API,
         global_state=app_state,

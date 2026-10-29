@@ -6,10 +6,12 @@ readme = "README.md"
 authors = [
     { name = "Nicholas Earl", email = "contact@nicholasearl.me" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "astropy>=7.0.1",
     "authlib>=1.5.2",
+    "cds-client",
+    "cds-core",
     "cds-dashboard",
     "httpx>=0.28.1",
     "itsdangerous>=2.2.0",
@@ -19,6 +21,8 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "solara>=1.44.1",
     "solara-enterprise>=1.44.1",
+    "solara-state",
+    "unique-namer",
 ]
 
 [build-system]
@@ -26,5 +30,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-cds-dashboard = { workspace = true }
+cds-client = { workspace = true }
 cds-core = { workspace = true }
+cds-dashboard = { workspace = true }
+unique-namer = { git = "https://github.com/cosmicds/unique-namer" }
+solara-state = { git = "https://github.com/nmearl/solara-state" }

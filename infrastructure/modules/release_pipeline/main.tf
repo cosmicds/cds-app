@@ -707,7 +707,7 @@ resource "aws_codepipeline" "cds_pipeline" {
 
 resource "aws_cloudwatch_log_group" "codebuild_portal" {
   name              = "/aws/codebuild/${var.environment}-cds-portal-build"
-  retention_in_days = 14
+  retention_in_days = var.codebuild_log_retention_days
   log_group_class   = "STANDARD"
 
   tags = {
@@ -718,7 +718,7 @@ resource "aws_cloudwatch_log_group" "codebuild_portal" {
 
 resource "aws_cloudwatch_log_group" "codebuild_hubble" {
   name              = "/aws/codebuild/${var.environment}-cds-hubble-build"
-  retention_in_days = 14
+  retention_in_days = var.codebuild_log_retention_days
   log_group_class   = "STANDARD"
 
   tags = {

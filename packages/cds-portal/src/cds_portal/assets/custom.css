@@ -1,80 +1,37 @@
-/* This, together with the two blocks below, loads our font of choice (Poppins)
- * and sets it as the primary font to use throughout the app
- * We need to mark everything as important to override Vuetify styling */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400&display=swap');
-
-:root {
-    --jp-content-font-family: "Poppins" !important;
-    --jp-ui-font-family: "Poppins" !important;
-
-    --primary-dark: #0D47A1;
-    --secondary-dark: #00838F;
-    --accent-dark: #FFC400;
-    --error-dark: #C5CAE9;
-    --info-dark: #BF360C;
-    --success-dark: #00E676;
-    --warning-dark: #DD2C00;
-    
-    --primary-light: #1565C0;
-    --secondary-light: #006064;
-    --accent-light: #FFD740;
-    --error-light: #121754;
-    --info-light: #FF7043;
-    --success-light: #388E3C;
-    --warning-light: #DD2C00;
-    
-    --cosmicds-red: #E60001;
-    --cosmicds-blue: #0F3A7E;
-
-    --cosmicds-red-lighter: #ff4e4e;
-    --cosmicds-blue-lighter: #1a63d9;
+body,
+.v-application {
+    font-family: "Inter", sans-serif !important;
 }
 
-:root .theme--dark {
-    --primary: var(--primary-dark);
-    --secondary: var(--secondary-dark);
-    --accent: var(--accent-dark);
-    --error: var(--error-dark);
-    --info: var(var(--info-dark));
-    --success: var(--success-dark);
-    --warning: var(--warning-dark);
+@media (min-width: 1264px) {
+    .container {
+        max-width: 1185px;
+    }
 }
 
-:root .theme--light {
-    --primary: var(--primary-light);
-    --secondary: var(--secondary-light);
-    --accent: var(--accent-light);
-    --error: var(--error-light);
-    --info: var(--info-light);
-    --success: var(--success-light);
-    --warning: var(--warning-light);
+@media (min-width: 1904px) {
+    .container {
+        max-width: 1185px;
+    }
 }
 
-
-html,
-.v-application,
-.v-application .title,
-.v-application *[class^='display'] {
-    font-family: "Poppins" !important;
-    font-weight: 200 !important;
-    font-style: normal !important;
+.theme--dark.v-sheet {
+    background-color: #121212;
 }
 
-/*.v-data-table__wrapper > table > tbody > tr:hover {*/
-/*  background: inherit !important;*/
-/*}*/
-
-/* This removes the solara watermark */
-.v-application--wrap > div:nth-child(2) > div:nth-child(2){
-    display: none !important;
+.text-h5 {
+    font-size: 1.25rem !important;
+    font-weight: 400 !important;
+    letter-spacing: normal !important;
 }
-
-.class_buttons {
-    justify-content: flex-end !important;
+.text-overline {
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.1666666667em !important;
+    text-transform: uppercase !important;
 }
 
 /* Educator Dashboard CSS */
-
 
 .cds-dashboard {
     /* this is just a wrapper to "scope" the css styles */
@@ -105,7 +62,7 @@ html,
 }
 
 .cds-dashboard .dialog-button {
-    position:absolute;
+    position: absolute;
     right: 1.5rem;
     bottom: 0.5rem;
     background-color: var(--md-blue-800) !important;
@@ -126,12 +83,12 @@ html,
 }
 
 .cds-dashboard .v-tabs--vertical .v-tabs-slider {
-    color:  var(--md-deep-orange-800);
+    color: var(--md-deep-orange-800);
 }
 
 .cds-dashboard .horizontal-tabs[aria-selected="true"] {
     color: var(--md-blue-700) !important;
-    font-weight: 800; 
+    font-weight: 800;
 }
 
 .cds-dashboard .v-btn__content {
@@ -148,7 +105,7 @@ html,
     padding-bottom: 16px;
 }
 
-.cds-dashboard .info-text{
+.cds-dashboard .info-text {
     padding: 0.5rem;
 }
 
@@ -161,13 +118,13 @@ html,
 /* Disable plotly tools */
 .cds-dashboard .modebar {
     display: none !important;
-}   
+}
 
 .cds-dashboard #click-any-row-for-more-detailed-question-information {
-    padding-left: 0.625rem;  /* 10px @ 16px/rem */
+    padding-left: 0.625rem; /* 10px @ 16px/rem */
 }
 .cds-dashboard #select-a-student-from-the-table-above-to-see-their-responses {
-    padding-left: 0.625rem;   
+    padding-left: 0.625rem;
 }
 
 .cds-dashboard .solara-markdown {
@@ -188,16 +145,14 @@ html,
     .cds-dashboard .v-tabs--vertical {
         display: block;
     }
-    
+
     .cds-dashboard .v-tabs--vertical > .v-tabs-bar > .v-slide-group__wrapper {
         flex: 0 1 auto;
     }
-    .cds-dashboard .v-tabs--vertical>.v-tabs-bar .v-tabs-bar__content {
-        flex-direction: row
+    .cds-dashboard .v-tabs--vertical > .v-tabs-bar .v-tabs-bar__content {
+        flex-direction: row;
     }
-
 }
-
 
 .cds-dashboard .my-buttons {
     width: 100%;
@@ -231,7 +186,7 @@ html,
 }
 
 .cds-dashboard .dialog-button {
-    position:absolute;
+    position: absolute;
     right: 1.5rem;
     bottom: 0.5rem;
     background-color: var(--md-blue-800) !important;
@@ -239,7 +194,7 @@ html,
 }
 
 .dash-dialog-button {
-    position:absolute;
+    position: absolute;
     right: 1.5rem;
     bottom: 0.5rem;
     background-color: var(--md-blue-800) !important;
@@ -254,7 +209,6 @@ html,
     width: 100%;
 }
 
-
 .cds-dashboard .vertical-tabs[aria-selected="true"] {
     background-color: var(--md-deep-orange-800) !important;
     color: white;
@@ -265,12 +219,12 @@ html,
 }
 
 .cds-dashboard .v-tabs--vertical .v-tabs-slider {
-    color:  var(--md-deep-orange-800);
+    color: var(--md-deep-orange-800);
 }
 
 .cds-dashboard .horizontal-tabs[aria-selected="true"] {
     color: var(--md-blue-700) !important;
-    font-weight: 800; 
+    font-weight: 800;
 }
 
 .cds-dashboard .v-btn__content {
@@ -287,7 +241,7 @@ html,
     padding-bottom: 16px;
 }
 
-.cds-dashboard .info-text{
+.cds-dashboard .info-text {
     padding: 0.5rem;
 }
 
@@ -300,13 +254,13 @@ html,
 /* Disable plotly tools */
 .cds-dashboard .modebar {
     display: none !important;
-}   
+}
 
 .cds-dashboard #click-any-row-for-more-detailed-question-information {
-    padding-left: 0.625rem;  /* 10px @ 16px/rem */
+    padding-left: 0.625rem; /* 10px @ 16px/rem */
 }
 .cds-dashboard #select-a-student-from-the-table-above-to-see-their-responses {
-    padding-left: 0.625rem;   
+    padding-left: 0.625rem;
 }
 
 .cds-dashboard .solara-markdown {
@@ -327,13 +281,11 @@ html,
     .cds-dashboard .v-tabs--vertical {
         display: block;
     }
-    
+
     .cds-dashboard .v-tabs--vertical > .v-tabs-bar > .v-slide-group__wrapper {
         flex: 0 1 auto;
     }
-    .cds-dashboard .v-tabs--vertical>.v-tabs-bar .v-tabs-bar__content {
-        flex-direction: row
+    .cds-dashboard .v-tabs--vertical > .v-tabs-bar .v-tabs-bar__content {
+        flex-direction: row;
     }
-
 }
-

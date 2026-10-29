@@ -7,7 +7,7 @@ authors = [
     { name = "CosmicDS Developers", email = "pudomprasert@cfa.harvard.edu" }
 ]
 license = "MIT"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "solara>=1.44.1",
     "solara-enterprise>=1.44.1",

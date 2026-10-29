@@ -37,7 +37,11 @@ class BaseAPI:
             logger.error("Failed to create hash: user not authenticated.")
             return "User not authenticated"
 
-        userinfo = auth.user.value.get("userinfo")
+        userinfo = auth.user.value.get("userinfo", {})
+
+        # Student sessions store the raw username directly as the DB key.
+        if "cds/student_username" in userinfo:
+            return userinfo["cds/student_username"]
 
         if not ("cds/email" in userinfo or "cds/name" in userinfo):
             logger.error("Failed to create hash: not authentication information.")

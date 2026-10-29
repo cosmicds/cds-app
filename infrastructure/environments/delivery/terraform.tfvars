@@ -2,7 +2,8 @@ aws_region    = "us-east-1"
 environment   = "production"
 github_branch = "main"
 
-github_repository = "nmearl/cds-app"
+github_repository            = "nmearl/cds-app"
+codebuild_log_retention_days = 7
 
 staging_portal_url          = "https://staging.app.cosmicds.cfa.harvard.edu"
 staging_cluster_name        = "staging-cluster"
