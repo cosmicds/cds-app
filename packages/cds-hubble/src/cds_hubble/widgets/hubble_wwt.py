@@ -11,11 +11,11 @@ class HubbleWWTWidget(WWTWidget):
     ).tag(wwt=None, wwt_reset=True)
 
     foreground = Unicode(
-        "SDSS9 color",
+        "SDSS 12",
         help="The layer to show in the foreground (`str`)",
     ).tag(wwt=None, wwt_reset=True)
 
-    SURVEYS_URL = "https://gist.githubusercontent.com/Carifio24/447d69e14a3196665fa3cb59f93ec0ee/raw/040cb93508c47284b44435c413e3fc92dc601f2d/surveys_minimal.wtml"
+    SURVEYS_URL = "https://gist.githubusercontent.com/Carifio24/447d69e14a3196665fa3cb59f93ec0ee/raw/1e7137802e6b6347f1b97c65fea3a5ce197be188/surveys_minimal.wtml"
 
 
     def __init__(self, *args, **kwargs):
