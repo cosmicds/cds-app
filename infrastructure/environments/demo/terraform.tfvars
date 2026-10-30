@@ -6,7 +6,7 @@ environment = "demo"
 site_domain_name   = ""
 certificate_domain = ""
 
-github_repository = "nmearl/cds-app"
+github_repository = "cosmicds/cds-app"
 github_branch     = "main"
 
 ecr_repository_name = "cds-hubble-demo"
