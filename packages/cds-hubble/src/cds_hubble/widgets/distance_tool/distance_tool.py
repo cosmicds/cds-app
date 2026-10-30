@@ -48,7 +48,7 @@ class DistanceTool(v.VueTemplate):
 
     wwt_ready = Bool(False).tag(sync=True)
 
-    SDSS = "SDSS9 color"
+    SDSS = "SDSS 12"
     DSS = "Digitized Sky Survey (Color)"
 
     UPDATE_TIME = 1  # seconds
