@@ -12,7 +12,7 @@ from ...story_state import StoryState
 from ...utils import GALAXY_FOV
 from ...widgets.hubble_wwt import HubbleWWTWidget
 
-SDSS = "SDSS9 color"
+SDSS = "SDSS 12"
 DSS = "Digitized Sky Survey (Color)"
 
 UPDATE_TIME = 1  # seconds
