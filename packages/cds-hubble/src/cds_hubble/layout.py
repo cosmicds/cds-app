@@ -13,11 +13,11 @@ from cds_core.layout import BaseLayout, BaseSetup
 from cds_core.logger import setup_logger
 from .remote import LOCAL_API
 from .story_state import StoryState
-from .utils import push_to_route, extract_changed_subtree
+from .utils import get_demo, push_to_route, extract_changed_subtree
 
 logger = setup_logger("LAYOUT")
 
-FORCE_DEMO = os.getenv("CDS_FORCE_DEMO", "false").strip().lower() == "true"
+FORCE_DEMO = get_demo()
 
 
 def _load_state(

@@ -1,4 +1,6 @@
 from collections import defaultdict
+import os
+
 from astropy import units as u
 from astropy.modeling import models, fitting
 from numpy import argsort, array, pi
@@ -433,3 +435,6 @@ def distance_for_velocity(velocity: float) -> float:
 
 def angular_size_for_velocity(velocity: float) -> float:
     return round(DISTANCE_CONSTANT / distance_for_velocity(velocity), 0)
+
+def get_demo() -> bool:
+    return os.getenv("CDS_FORCE_DEMO", "false").strip().lower() == "true"

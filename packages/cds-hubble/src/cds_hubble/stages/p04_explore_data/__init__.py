@@ -44,6 +44,7 @@ from ...story_state import (
 )
 from ...utils import (
     AGE_CONSTANT,
+    get_demo,
     models_to_glue_data,
     PLOTLY_MARGINS,
     get_image_path,
@@ -76,7 +77,7 @@ def Page(app_state: Reactive[AppState]):
     clear_drawn_line = solara.use_reactive(0)
     clear_fit_line = solara.use_reactive(0)
 
-    skip_waiting_room, set_skip_waiting_room = solara.use_state(False)
+    skip_waiting_room, set_skip_waiting_room = solara.use_state(get_demo())
     class_data_loaded = solara.use_reactive(False)
 
     def glue_setup() -> Tuple[JupyterApplication, Dict[str, CDSScatterView]]:
